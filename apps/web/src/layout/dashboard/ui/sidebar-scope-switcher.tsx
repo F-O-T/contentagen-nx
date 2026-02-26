@@ -5,15 +5,6 @@ import {
 } from "@packages/ui/components/avatar";
 import { Button } from "@packages/ui/components/button";
 import {
-   Command,
-   CommandEmpty,
-   CommandGroup,
-   CommandInput,
-   CommandItem,
-   CommandList,
-   CommandSeparator,
-} from "@packages/ui/components/command";
-import {
    CredenzaBody,
    CredenzaDescription,
    CredenzaFooter,
@@ -21,16 +12,23 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import {
-   Popover,
-   PopoverContent,
-   PopoverTrigger,
-} from "@packages/ui/components/popover";
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuSeparator,
+   DropdownMenuSub,
+   DropdownMenuSubContent,
+   DropdownMenuSubTrigger,
+   DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import {
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
    useSidebar,
 } from "@packages/ui/components/sidebar";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
    Link,
@@ -38,18 +36,29 @@ import {
    useParams,
    useRouter,
 } from "@tanstack/react-router";
-import { Check, ChevronDown, Plus } from "lucide-react";
-import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
+import {
+   Check,
+   ChevronsUpDown,
+   CreditCard,
+   LogOut,
+   Plus,
+   Settings,
+   UserPlus,
+} from "lucide-react";
+import { Suspense, useCallback, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { toast } from "sonner";
 import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-active-organization";
 import { CreateTeamForm } from "@/features/organization/ui/create-team-form";
 import { ManageOrganizationForm } from "@/features/organization/ui/manage-organization-form";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
 import { useSheet } from "@/hooks/use-sheet";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
+import { ThemeSwitcher } from "./theme-switcher";
 
 type Organization = {
    id: string;
@@ -90,11 +99,25 @@ function getOrgColor(name: string): string {
    return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length] ?? "";
 }
 
-function RoleBadge({ role }: { role: string }) {
+function OrgAvatar({
+   name,
+   logo,
+   size = "sm",
+}: {
+   name: string;
+   logo?: string | null;
+   size?: "sm" | "md";
+}) {
+   const sizeClass = size === "md" ? "size-5 rounded-md" : "size-4 rounded-sm";
    return (
-      <span className="ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted">
-         {role}
-      </span>
+      <Avatar className={`${sizeClass} shrink-0`}>
+         <AvatarImage alt={name} src={logo ?? undefined} />
+         <AvatarFallback
+            className={`${sizeClass} text-[9px] font-bold text-white ${getOrgColor(name)}`}
+         >
+            {getInitials(name)}
+         </AvatarFallback>
+      </Avatar>
    );
 }
 
@@ -103,8 +126,11 @@ function SidebarScopeSwitcherSkeleton() {
       <SidebarMenu>
          <SidebarMenuItem>
             <SidebarMenuButton className="pointer-events-none" size="lg">
-               <div className="size-8 rounded-md bg-muted" />
-               <div className="h-4 w-24 rounded bg-muted" />
+               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted" />
+               <div className="grid flex-1 gap-1">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-3 w-16" />
+               </div>
             </SidebarMenuButton>
          </SidebarMenuItem>
       </SidebarMenu>
@@ -117,49 +143,32 @@ function SidebarScopeSwitcherContent() {
    const { activeTeam, teams } = useActiveTeam();
    const { openSheet } = useSheet();
    const { openCredenza, closeCredenza } = useCredenza();
+   const { openAlertDialog } = useAlertDialog();
    const { setActiveOrganization } = useSetActiveOrganization();
    const [isPending, startTransition] = useTransition();
    const queryClient = useQueryClient();
    const router = useRouter();
    const { pathname } = useLocation();
+   const { isMobile, setOpenMobile } = useSidebar();
    const params = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const currentSlug = params.slug ?? activeOrganization.slug;
+   const slug = params.slug ?? "";
+   const teamSlug = params.teamSlug ?? "";
+
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),
    );
-   const { state } = useSidebar();
-   const isCollapsed = state === "collapsed";
-
-   const [orgOpen, setOrgOpen] = useState(false);
-   const [teamOpen, setTeamOpen] = useState(false);
+   const { data: session } = useSuspenseQuery(
+      orpc.session.getSession.queryOptions({}),
+   );
 
    const organizationList = organizations ?? [];
 
-   const currentOrg = useMemo(
-      () =>
-         organizationList.find((org) => org.id === activeOrganization.id) ??
-         null,
-      [organizationList, activeOrganization.id],
-   );
-
-   const otherOrgs = useMemo(
-      () => organizationList.filter((org) => org.id !== activeOrganization.id),
-      [organizationList, activeOrganization.id],
-   );
-
-   const otherTeams = useMemo(
-      () => teams.filter((team) => team.id !== activeTeam?.id),
-      [teams, activeTeam?.id],
-   );
-
    const handleOrganizationSwitch = useCallback(
       (org: Organization) => {
-         if (org.id === activeOrganization.id || isPending) {
-            setOrgOpen(false);
-            return;
-         }
+         if (org.id === activeOrganization.id || isPending) return;
 
          startTransition(async () => {
             await setActiveOrganization({
@@ -172,7 +181,6 @@ function SidebarScopeSwitcherContent() {
                : `/${org.slug}/${params.teamSlug ?? ""}/home`;
 
             router.navigate({ to: nextPath });
-            setOrgOpen(false);
          });
       },
       [
@@ -189,14 +197,9 @@ function SidebarScopeSwitcherContent() {
 
    const handleTeamSwitch = useCallback(
       async (team: Team) => {
-         if (team.id === activeTeam?.id) {
-            setTeamOpen(false);
-            return;
-         }
+         if (team.id === activeTeam?.id) return;
 
-         await authClient.organization.setActiveTeam({
-            teamId: team.id,
-         });
+         await authClient.organization.setActiveTeam({ teamId: team.id });
 
          await queryClient.invalidateQueries({
             queryKey: orpc.session.getSession.queryKey({}),
@@ -210,16 +213,14 @@ function SidebarScopeSwitcherContent() {
             if (pathname.startsWith(`${prefix}/`)) {
                nextPath = params.teamSlug
                   ? pathname.replace(
-                       `${prefix}/${params.teamSlug}`,
-                       `${prefix}/${teamParam}`,
-                    )
+                     `${prefix}/${params.teamSlug}`,
+                     `${prefix}/${teamParam}`,
+                  )
                   : `/${currentSlug}/${teamParam}${pathname.slice(prefix.length)}`;
             }
 
             router.navigate({ to: nextPath });
          }
-
-         setTeamOpen(false);
       },
       [
          activeTeam?.id,
@@ -231,246 +232,327 @@ function SidebarScopeSwitcherContent() {
       ],
    );
 
-   const handleNewProject = useCallback(() => {
-      setTeamOpen(false);
+   const handleNewProject = useCallback(
+      (e?: React.MouseEvent) => {
+         e?.stopPropagation();
 
-      if (projectLimit !== null && teams.length >= projectLimit) {
-         openCredenza({
-            children: (
-               <>
-                  <CredenzaHeader>
-                     <CredenzaTitle>Limite de projetos</CredenzaTitle>
-                     <CredenzaDescription>
-                        Voce esta usando {projectCount} de {projectLimit}{" "}
-                        projetos
-                     </CredenzaDescription>
-                  </CredenzaHeader>
-                  <CredenzaBody>
-                     <p className="text-sm text-muted-foreground">
-                        Faca upgrade para o add-on Boost para criar projetos
-                        ilimitados
-                     </p>
-                  </CredenzaBody>
-                  <CredenzaFooter className="flex gap-2">
-                     <Button onClick={closeCredenza} variant="outline">
-                        Cancelar
-                     </Button>
-                     <Button asChild>
-                        <Link
-                           onClick={closeCredenza}
-                           params={{
-                              slug: currentSlug,
-                              teamSlug: params.teamSlug ?? "",
-                           }}
-                           to="/$slug/$teamSlug/billing"
-                        >
-                           Ver planos
-                        </Link>
-                     </Button>
-                  </CredenzaFooter>
-               </>
-            ),
-         });
-         return;
-      }
+         if (projectLimit !== null && teams.length >= projectLimit) {
+            openCredenza({
+               children: (
+                  <>
+                     <CredenzaHeader>
+                        <CredenzaTitle>Limite de projetos</CredenzaTitle>
+                        <CredenzaDescription>
+                           Voce esta usando {projectCount} de {projectLimit}{" "}
+                           projetos
+                        </CredenzaDescription>
+                     </CredenzaHeader>
+                     <CredenzaBody>
+                        <p className="text-sm text-muted-foreground">
+                           Faca upgrade para o add-on Boost para criar projetos
+                           ilimitados
+                        </p>
+                     </CredenzaBody>
+                     <CredenzaFooter className="flex gap-2">
+                        <Button onClick={closeCredenza} variant="outline">
+                           Cancelar
+                        </Button>
+                        <Button asChild>
+                           <Link
+                              onClick={closeCredenza}
+                              params={{ slug, teamSlug }}
+                              to="/$slug/$teamSlug/billing"
+                           >
+                              Ver planos
+                           </Link>
+                        </Button>
+                     </CredenzaFooter>
+                  </>
+               ),
+            });
+            return;
+         }
 
-      openSheet({
-         children: <CreateTeamForm />,
+         openSheet({ children: <CreateTeamForm /> });
+      },
+      [
+         openSheet,
+         openCredenza,
+         closeCredenza,
+         projectLimit,
+         projectCount,
+         teams.length,
+         slug,
+         teamSlug,
+      ],
+   );
+
+   const handleNewOrganization = useCallback(
+      (e?: React.MouseEvent) => {
+         e?.stopPropagation();
+         openSheet({ children: <ManageOrganizationForm /> });
+      },
+      [openSheet],
+   );
+
+   const handleLogout = useCallback(async () => {
+      await authClient.signOut({
+         fetchOptions: {
+            onError: ({ error }) => {
+               toast.error(error.message, { id: "logout" });
+            },
+            onRequest: () => {
+               toast.loading("Saindo...", { id: "logout" });
+            },
+            onSuccess: async () => {
+               await queryClient.invalidateQueries({
+                  queryKey: orpc.session.getSession.queryKey({}),
+               });
+               router.navigate({ to: "/auth/sign-in" });
+               toast.success("Você saiu com sucesso", { id: "logout" });
+            },
+         },
       });
-   }, [
-      openSheet,
-      openCredenza,
-      closeCredenza,
-      projectLimit,
-      projectCount,
-      teams.length,
-      currentSlug,
-   ]);
+      setOpenMobile(false);
+   }, [queryClient, router, setOpenMobile]);
 
-   const handleNewOrganization = useCallback(() => {
-      setOrgOpen(false);
-      openSheet({
-         children: <ManageOrganizationForm />,
+   const handleLogoutClick = useCallback(() => {
+      openAlertDialog({
+         actionLabel: "Sair",
+         cancelLabel: "Cancelar",
+         description: "Tem certeza que deseja sair da sua conta?",
+         onAction: handleLogout,
+         title: "Sair da Conta",
+         variant: "destructive",
       });
-   }, [openSheet]);
+   }, [openAlertDialog, handleLogout]);
 
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <div
-               className={`flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"}`}
-            >
-               <Popover onOpenChange={setOrgOpen} open={orgOpen}>
-                  <PopoverTrigger asChild>
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                     size="lg"
+                  >
+                     <Avatar className="aspect-square size-8 shrink-0 rounded-lg">
+                        <AvatarImage
+                           alt={activeOrganization.name}
+                           src={activeOrganization.logo ?? undefined}
+                        />
+                        <AvatarFallback
+                           className={`rounded-lg text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                        >
+                           {getInitials(activeOrganization.name)}
+                        </AvatarFallback>
+                     </Avatar>
+                     <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">
+                           {activeTeam?.name ?? "Sem projeto"}
+                        </span>
+                        <span className="truncate text-xs text-muted-foreground">
+                           {activeOrganization.name}
+                        </span>
+                     </div>
+                     <ChevronsUpDown className="ml-auto size-4 shrink-0" />
+                  </SidebarMenuButton>
+               </DropdownMenuTrigger>
+
+               <DropdownMenuContent
+                  align="start"
+                  className="w-(--radix-dropdown-menu-trigger-width) min-w-72 rounded-lg"
+                  side={isMobile ? "bottom" : "bottom"}
+                  sideOffset={4}
+               >
+                  {/* ── PROJECT ── */}
+                  <DropdownMenuLabel className="flex items-center justify-between py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                     Projeto
                      <button
-                        aria-label="Organizacao"
-                        className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "w-full p-0" : "p-1.5"}`}
+                        className="rounded p-0.5 transition-colors hover:bg-accent hover:text-accent-foreground"
+                        onClick={handleNewProject}
+                        title="Novo projeto"
                         type="button"
                      >
-                        <Avatar
-                           className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}
-                        >
-                           <AvatarImage
-                              alt={activeOrganization.name}
-                              src={activeOrganization.logo ?? undefined}
-                           />
-                           <AvatarFallback
-                              className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                        <Plus className="size-3.5" />
+                     </button>
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuSub>
+                     <DropdownMenuSubTrigger className="gap-2">
+                        <span className="truncate font-medium">
+                           {activeTeam?.name ?? "Sem projeto"}
+                        </span>
+                     </DropdownMenuSubTrigger>
+                     <DropdownMenuSubContent className="min-w-52">
+                        {teams.map((team, index) => (
+                           <DropdownMenuItem
+                              key={`team-${index + 1}`}
+                              onSelect={() => handleTeamSwitch(team)}
                            >
-                              {getInitials(activeOrganization.name)}
+                              {team.id === activeTeam?.id ? (
+                                 <Check className="size-4 shrink-0" />
+                              ) : (
+                                 <span className="size-4 shrink-0" />
+                              )}
+                              <span className="truncate">{team.name}</span>
+                           </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => handleNewProject()}>
+                           <Plus className="size-4" />
+                           <span>
+                              {projectLimit !== null &&
+                                 projectLimit !== Number.POSITIVE_INFINITY
+                                 ? `Novo projeto (${projectCount}/${projectLimit})`
+                                 : "Novo projeto"}
+                           </span>
+                        </DropdownMenuItem>
+                     </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuItem asChild>
+                     <Link
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/settings/organization/members"
+                     >
+                        <UserPlus className="size-4" />
+                        Convidar membros
+                     </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                     <Link
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/settings/project/general"
+                     >
+                        <Settings className="size-4" />
+                        Configurações do projeto
+                     </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* ── ORGANIZATION ── */}
+                  <DropdownMenuLabel className="flex items-center justify-between py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                     Organização
+                     <button
+                        className="rounded p-0.5 transition-colors hover:bg-accent hover:text-accent-foreground"
+                        onClick={handleNewOrganization}
+                        title="Nova organização"
+                        type="button"
+                     >
+                        <Plus className="size-3.5" />
+                     </button>
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuSub>
+                     <DropdownMenuSubTrigger className="gap-2">
+                        <OrgAvatar
+                           logo={activeOrganization.logo}
+                           name={activeOrganization.name}
+                        />
+                        <span className="truncate font-medium">
+                           {activeOrganization.name}
+                        </span>
+                     </DropdownMenuSubTrigger>
+                     <DropdownMenuSubContent className="min-w-52">
+                        {organizationList.map((org, index) => (
+                           <DropdownMenuItem
+                              key={`org-${index + 1}`}
+                              onSelect={() => handleOrganizationSwitch(org)}
+                           >
+                              {org.id === activeOrganization.id ? (
+                                 <Check className="size-4 shrink-0" />
+                              ) : (
+                                 <span className="size-4 shrink-0" />
+                              )}
+                              <OrgAvatar
+                                 logo={org.logo}
+                                 name={org.name}
+                                 size="md"
+                              />
+                              <span className="truncate">{org.name}</span>
+                              {org.role && (
+                                 <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">
+                                    {org.role}
+                                 </span>
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                           onSelect={() => handleNewOrganization()}
+                        >
+                           <Plus className="size-4" />
+                           Nova organização
+                        </DropdownMenuItem>
+                     </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuItem asChild>
+                     <Link
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/billing"
+                     >
+                        <CreditCard className="size-4" />
+                        Cobrança & uso
+                     </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                     <Link
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/settings/organization/general"
+                     >
+                        <Settings className="size-4" />
+                        Configurações da organização
+                     </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* ── ACCOUNT ── */}
+                  <DropdownMenuLabel className="py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                     Conta
+                  </DropdownMenuLabel>
+
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                     <span className="text-sm text-muted-foreground">Tema</span>
+                     <ThemeSwitcher />
+                  </div>
+
+                  <DropdownMenuItem asChild className="py-2">
+                     <Link
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/settings/profile"
+                     >
+                        <Avatar className="size-6 shrink-0 rounded-full">
+                           <AvatarImage
+                              alt={session?.user.name ?? ""}
+                              src={session?.user.image ?? undefined}
+                           />
+                           <AvatarFallback className="rounded-full text-[10px]">
+                              {session?.user.name?.charAt(0) ?? "?"}
                            </AvatarFallback>
                         </Avatar>
-                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                     align="start"
-                     className="w-72 p-0"
-                     sideOffset={8}
-                  >
-                     <Command>
-                        <CommandInput placeholder="Filtrar organizacoes..." />
-                        <CommandList>
-                           <CommandEmpty>
-                              Nenhum resultado encontrado.
-                           </CommandEmpty>
-                           {currentOrg && (
-                              <CommandGroup heading="Organizacao atual">
-                                 <CommandItem disabled value={currentOrg.name}>
-                                    <Avatar className="size-5 rounded-md">
-                                       <AvatarImage
-                                          alt={currentOrg.name}
-                                          src={currentOrg.logo ?? undefined}
-                                       />
-                                       <AvatarFallback
-                                          className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
-                                       >
-                                          {getInitials(currentOrg.name)}
-                                       </AvatarFallback>
-                                    </Avatar>
-                                    <span className="truncate">
-                                       {currentOrg.name}
-                                    </span>
-                                    {currentOrg.role && (
-                                       <RoleBadge role={currentOrg.role} />
-                                    )}
-                                    <Check className="ml-1 size-4 shrink-0" />
-                                 </CommandItem>
-                              </CommandGroup>
-                           )}
-                           {otherOrgs.length > 0 && (
-                              <CommandGroup heading="Outras organizacoes">
-                                 {otherOrgs.map((org, index) => (
-                                    <CommandItem
-                                       key={`org-${index + 1}`}
-                                       onSelect={() =>
-                                          handleOrganizationSwitch(org)
-                                       }
-                                       value={org.name}
-                                    >
-                                       <Avatar className="size-5 rounded-md">
-                                          <AvatarImage
-                                             alt={org.name}
-                                             src={org.logo ?? undefined}
-                                          />
-                                          <AvatarFallback
-                                             className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
-                                          >
-                                             {getInitials(org.name)}
-                                          </AvatarFallback>
-                                       </Avatar>
-                                       <span className="truncate">
-                                          {org.name}
-                                       </span>
-                                       {org.role && (
-                                          <RoleBadge role={org.role} />
-                                       )}
-                                    </CommandItem>
-                                 ))}
-                              </CommandGroup>
-                           )}
-                           <CommandSeparator />
-                           <CommandGroup>
-                              <CommandItem
-                                 onSelect={handleNewOrganization}
-                                 value="Nova organizacao"
-                              >
-                                 <Plus className="size-4" />
-                                 <span>Nova organizacao</span>
-                              </CommandItem>
-                           </CommandGroup>
-                        </CommandList>
-                     </Command>
-                  </PopoverContent>
-               </Popover>
-
-               {!isCollapsed && (
-                  <Popover onOpenChange={setTeamOpen} open={teamOpen}>
-                     <PopoverTrigger asChild>
-                        <button
-                           aria-label="Projeto"
-                           className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent"
-                           type="button"
-                        >
-                           <span className="truncate font-medium flex-1">
-                              {activeTeam?.name ?? "Sem projeto"}
+                        <div className="grid min-w-0 flex-1 leading-tight">
+                           <span className="truncate text-sm font-medium">
+                              {session?.user.name}
                            </span>
-                           <ChevronDown className="ml-auto size-4" />
-                        </button>
-                     </PopoverTrigger>
-                     <PopoverContent
-                        align="start"
-                        className="w-72 p-0"
-                        sideOffset={8}
-                     >
-                        <Command>
-                           <CommandInput placeholder="Filtrar projetos..." />
-                           <CommandList>
-                              <CommandEmpty>
-                                 Nenhum resultado encontrado.
-                              </CommandEmpty>
-                              <CommandGroup heading="Projetos">
-                                 {activeTeam && (
-                                    <CommandItem
-                                       disabled
-                                       value={activeTeam.name}
-                                    >
-                                       <Check className="size-4" />
-                                       <span className="truncate">
-                                          {activeTeam.name}
-                                       </span>
-                                    </CommandItem>
-                                 )}
-                                 {otherTeams.map((team, index) => (
-                                    <CommandItem
-                                       key={`team-${index + 1}`}
-                                       onSelect={() => handleTeamSwitch(team)}
-                                       value={team.name}
-                                    >
-                                       <span className="size-4" />
-                                       <span className="truncate">
-                                          {team.name}
-                                       </span>
-                                    </CommandItem>
-                                 ))}
-                                 <CommandItem
-                                    onSelect={handleNewProject}
-                                    value="Novo projeto"
-                                 >
-                                    <Plus className="size-4" />
-                                    <span>
-                                       {projectLimit !== null &&
-                                       projectLimit !== Number.POSITIVE_INFINITY
-                                          ? `Novo projeto (${projectCount}/${projectLimit})`
-                                          : "Novo projeto"}
-                                    </span>
-                                 </CommandItem>
-                              </CommandGroup>
-                           </CommandList>
-                        </Command>
-                     </PopoverContent>
-                  </Popover>
-               )}
-            </div>
+                           <span className="truncate text-xs text-muted-foreground">
+                              {session?.user.email}
+                           </span>
+                        </div>
+                     </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onSelect={handleLogoutClick}>
+                     <LogOut className="size-4" />
+                     Sair
+                  </DropdownMenuItem>
+               </DropdownMenuContent>
+            </DropdownMenu>
          </SidebarMenuItem>
       </SidebarMenu>
    );

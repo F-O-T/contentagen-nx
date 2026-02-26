@@ -27,6 +27,7 @@ import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index
 import { Route as AuthSignInEmailRouteImport } from './routes/auth/sign-in/email'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiFilesSplatRouteImport } from './routes/api/files/$'
+import { Route as ApiChatSplatRouteImport } from './routes/api/chat/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedSlugTeamSlugRouteImport } from './routes/_authenticated/$slug/$teamSlug'
 import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedSlugTeamSlugDashboardRouteImport } from './routes
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings'
 import { Route as AuthenticatedSlugTeamSlugDashboardSearchRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/search'
 import { Route as AuthenticatedSlugTeamSlugDashboardPlansRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/plans'
+import { Route as AuthenticatedSlugTeamSlugDashboardChatRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/chat'
 import { Route as AuthenticatedSlugTeamSlugDashboardBillingRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/billing'
 import { Route as AuthenticatedSlugTeamSlugDashboardContentIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/$contentId'
 import { Route as AuthenticatedSlugTeamSlugDashboardWritersIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/writers/index'
@@ -43,6 +45,7 @@ import { Route as AuthenticatedSlugTeamSlugDashboardFormsIndexRouteImport } from
 import { Route as AuthenticatedSlugTeamSlugDashboardExperimentsIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/experiments/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardContentIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/content/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardClustersIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/clusters/index'
+import { Route as AuthenticatedSlugTeamSlugDashboardChatIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/chat/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardAssetsIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/assets/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardWritersNewRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/writers/new'
 import { Route as AuthenticatedSlugTeamSlugDashboardWritersWriterIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/writers/$writerId'
@@ -57,6 +60,7 @@ import { Route as AuthenticatedSlugTeamSlugDashboardExperimentsNewRouteImport } 
 import { Route as AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/experiments/$experimentId'
 import { Route as AuthenticatedSlugTeamSlugDashboardClustersNewRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/clusters/new'
 import { Route as AuthenticatedSlugTeamSlugDashboardClustersClusterIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/clusters/$clusterId'
+import { Route as AuthenticatedSlugTeamSlugDashboardChatThreadIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/index'
@@ -179,6 +183,11 @@ const ApiFilesSplatRoute = ApiFilesSplatRouteImport.update({
   path: '/api/files/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatSplatRoute = ApiChatSplatRouteImport.update({
+  id: '/api/chat/$',
+  path: '/api/chat/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -217,6 +226,12 @@ const AuthenticatedSlugTeamSlugDashboardPlansRoute =
   AuthenticatedSlugTeamSlugDashboardPlansRouteImport.update({
     id: '/plans',
     path: '/plans',
+    getParentRoute: () => AuthenticatedSlugTeamSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugTeamSlugDashboardChatRoute =
+  AuthenticatedSlugTeamSlugDashboardChatRouteImport.update({
+    id: '/chat',
+    path: '/chat',
     getParentRoute: () => AuthenticatedSlugTeamSlugDashboardRoute,
   } as any)
 const AuthenticatedSlugTeamSlugDashboardBillingRoute =
@@ -272,6 +287,12 @@ const AuthenticatedSlugTeamSlugDashboardClustersIndexRoute =
     id: '/clusters/',
     path: '/clusters/',
     getParentRoute: () => AuthenticatedSlugTeamSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugTeamSlugDashboardChatIndexRoute =
+  AuthenticatedSlugTeamSlugDashboardChatIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedSlugTeamSlugDashboardChatRoute,
   } as any)
 const AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute =
   AuthenticatedSlugTeamSlugDashboardAssetsIndexRouteImport.update({
@@ -356,6 +377,12 @@ const AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute =
     id: '/clusters/$clusterId',
     path: '/clusters/$clusterId',
     getParentRoute: () => AuthenticatedSlugTeamSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute =
+  AuthenticatedSlugTeamSlugDashboardChatThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedSlugTeamSlugDashboardChatRoute,
   } as any)
 const AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRoute =
   AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteImport.update({
@@ -616,16 +643,19 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugDashboardRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/$slug/$teamSlug/$contentId': typeof AuthenticatedSlugTeamSlugDashboardContentIdRoute
   '/$slug/$teamSlug/billing': typeof AuthenticatedSlugTeamSlugDashboardBillingRoute
+  '/$slug/$teamSlug/chat': typeof AuthenticatedSlugTeamSlugDashboardChatRouteWithChildren
   '/$slug/$teamSlug/plans': typeof AuthenticatedSlugTeamSlugDashboardPlansRoute
   '/$slug/$teamSlug/search': typeof AuthenticatedSlugTeamSlugDashboardSearchRoute
   '/$slug/$teamSlug/settings': typeof AuthenticatedSlugTeamSlugDashboardSettingsRouteWithChildren
   '/$slug/$teamSlug/analytics/data-management': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
+  '/$slug/$teamSlug/chat/$threadId': typeof AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute
   '/$slug/$teamSlug/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/$slug/$teamSlug/clusters/new': typeof AuthenticatedSlugTeamSlugDashboardClustersNewRoute
   '/$slug/$teamSlug/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
@@ -640,6 +670,7 @@ export interface FileRoutesByFullPath {
   '/$slug/$teamSlug/writers/$writerId': typeof AuthenticatedSlugTeamSlugDashboardWritersWriterIdRoute
   '/$slug/$teamSlug/writers/new': typeof AuthenticatedSlugTeamSlugDashboardWritersNewRoute
   '/$slug/$teamSlug/assets/': typeof AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute
+  '/$slug/$teamSlug/chat/': typeof AuthenticatedSlugTeamSlugDashboardChatIndexRoute
   '/$slug/$teamSlug/clusters/': typeof AuthenticatedSlugTeamSlugDashboardClustersIndexRoute
   '/$slug/$teamSlug/content/': typeof AuthenticatedSlugTeamSlugDashboardContentIndexRoute
   '/$slug/$teamSlug/experiments/': typeof AuthenticatedSlugTeamSlugDashboardExperimentsIndexRoute
@@ -694,6 +725,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugDashboardRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -702,6 +734,7 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/billing': typeof AuthenticatedSlugTeamSlugDashboardBillingRoute
   '/$slug/$teamSlug/plans': typeof AuthenticatedSlugTeamSlugDashboardPlansRoute
   '/$slug/$teamSlug/search': typeof AuthenticatedSlugTeamSlugDashboardSearchRoute
+  '/$slug/$teamSlug/chat/$threadId': typeof AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute
   '/$slug/$teamSlug/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/$slug/$teamSlug/clusters/new': typeof AuthenticatedSlugTeamSlugDashboardClustersNewRoute
   '/$slug/$teamSlug/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
@@ -716,6 +749,7 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/writers/$writerId': typeof AuthenticatedSlugTeamSlugDashboardWritersWriterIdRoute
   '/$slug/$teamSlug/writers/new': typeof AuthenticatedSlugTeamSlugDashboardWritersNewRoute
   '/$slug/$teamSlug/assets': typeof AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute
+  '/$slug/$teamSlug/chat': typeof AuthenticatedSlugTeamSlugDashboardChatIndexRoute
   '/$slug/$teamSlug/clusters': typeof AuthenticatedSlugTeamSlugDashboardClustersIndexRoute
   '/$slug/$teamSlug/content': typeof AuthenticatedSlugTeamSlugDashboardContentIndexRoute
   '/$slug/$teamSlug/experiments': typeof AuthenticatedSlugTeamSlugDashboardExperimentsIndexRoute
@@ -773,6 +807,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/_authenticated/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -780,10 +815,12 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard': typeof AuthenticatedSlugTeamSlugDashboardRouteWithChildren
   '/_authenticated/$slug/$teamSlug/_dashboard/$contentId': typeof AuthenticatedSlugTeamSlugDashboardContentIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/billing': typeof AuthenticatedSlugTeamSlugDashboardBillingRoute
+  '/_authenticated/$slug/$teamSlug/_dashboard/chat': typeof AuthenticatedSlugTeamSlugDashboardChatRouteWithChildren
   '/_authenticated/$slug/$teamSlug/_dashboard/plans': typeof AuthenticatedSlugTeamSlugDashboardPlansRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/search': typeof AuthenticatedSlugTeamSlugDashboardSearchRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings': typeof AuthenticatedSlugTeamSlugDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
+  '/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId': typeof AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/clusters/new': typeof AuthenticatedSlugTeamSlugDashboardClustersNewRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
@@ -798,6 +835,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard/writers/$writerId': typeof AuthenticatedSlugTeamSlugDashboardWritersWriterIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/writers/new': typeof AuthenticatedSlugTeamSlugDashboardWritersNewRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/assets/': typeof AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute
+  '/_authenticated/$slug/$teamSlug/_dashboard/chat/': typeof AuthenticatedSlugTeamSlugDashboardChatIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/clusters/': typeof AuthenticatedSlugTeamSlugDashboardClustersIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/content/': typeof AuthenticatedSlugTeamSlugDashboardContentIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/experiments/': typeof AuthenticatedSlugTeamSlugDashboardExperimentsIndexRoute
@@ -855,16 +893,19 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in/'
     | '/$slug/$teamSlug/$contentId'
     | '/$slug/$teamSlug/billing'
+    | '/$slug/$teamSlug/chat'
     | '/$slug/$teamSlug/plans'
     | '/$slug/$teamSlug/search'
     | '/$slug/$teamSlug/settings'
     | '/$slug/$teamSlug/analytics/data-management'
+    | '/$slug/$teamSlug/chat/$threadId'
     | '/$slug/$teamSlug/clusters/$clusterId'
     | '/$slug/$teamSlug/clusters/new'
     | '/$slug/$teamSlug/experiments/$experimentId'
@@ -879,6 +920,7 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/writers/$writerId'
     | '/$slug/$teamSlug/writers/new'
     | '/$slug/$teamSlug/assets/'
+    | '/$slug/$teamSlug/chat/'
     | '/$slug/$teamSlug/clusters/'
     | '/$slug/$teamSlug/content/'
     | '/$slug/$teamSlug/experiments/'
@@ -933,6 +975,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -941,6 +984,7 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/billing'
     | '/$slug/$teamSlug/plans'
     | '/$slug/$teamSlug/search'
+    | '/$slug/$teamSlug/chat/$threadId'
     | '/$slug/$teamSlug/clusters/$clusterId'
     | '/$slug/$teamSlug/clusters/new'
     | '/$slug/$teamSlug/experiments/$experimentId'
@@ -955,6 +999,7 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/writers/$writerId'
     | '/$slug/$teamSlug/writers/new'
     | '/$slug/$teamSlug/assets'
+    | '/$slug/$teamSlug/chat'
     | '/$slug/$teamSlug/clusters'
     | '/$slug/$teamSlug/content'
     | '/$slug/$teamSlug/experiments'
@@ -1011,6 +1056,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/_authenticated/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -1018,10 +1064,12 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamSlug/_dashboard'
     | '/_authenticated/$slug/$teamSlug/_dashboard/$contentId'
     | '/_authenticated/$slug/$teamSlug/_dashboard/billing'
+    | '/_authenticated/$slug/$teamSlug/_dashboard/chat'
     | '/_authenticated/$slug/$teamSlug/_dashboard/plans'
     | '/_authenticated/$slug/$teamSlug/_dashboard/search'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management'
+    | '/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId'
     | '/_authenticated/$slug/$teamSlug/_dashboard/clusters/$clusterId'
     | '/_authenticated/$slug/$teamSlug/_dashboard/clusters/new'
     | '/_authenticated/$slug/$teamSlug/_dashboard/experiments/$experimentId'
@@ -1036,6 +1084,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamSlug/_dashboard/writers/$writerId'
     | '/_authenticated/$slug/$teamSlug/_dashboard/writers/new'
     | '/_authenticated/$slug/$teamSlug/_dashboard/assets/'
+    | '/_authenticated/$slug/$teamSlug/_dashboard/chat/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/clusters/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/content/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/experiments/'
@@ -1084,6 +1133,7 @@ export interface RootRouteChildren {
   OauthConsentRoute: typeof OauthConsentRoute
   DotwellKnownOauthAuthorizationServerSplatRoute: typeof DotwellKnownOauthAuthorizationServerSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiChatSplatRoute: typeof ApiChatSplatRoute
   ApiFilesSplatRoute: typeof ApiFilesSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
@@ -1216,6 +1266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFilesSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/$': {
+      id: '/api/chat/$'
+      path: '/api/chat/$'
+      fullPath: '/api/chat/$'
+      preLoaderRoute: typeof ApiChatSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -1263,6 +1320,13 @@ declare module '@tanstack/react-router' {
       path: '/plans'
       fullPath: '/$slug/$teamSlug/plans'
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardPlansRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardRoute
+    }
+    '/_authenticated/$slug/$teamSlug/_dashboard/chat': {
+      id: '/_authenticated/$slug/$teamSlug/_dashboard/chat'
+      path: '/chat'
+      fullPath: '/$slug/$teamSlug/chat'
+      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardChatRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardRoute
     }
     '/_authenticated/$slug/$teamSlug/_dashboard/billing': {
@@ -1327,6 +1391,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$slug/$teamSlug/clusters/'
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardClustersIndexRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardRoute
+    }
+    '/_authenticated/$slug/$teamSlug/_dashboard/chat/': {
+      id: '/_authenticated/$slug/$teamSlug/_dashboard/chat/'
+      path: '/'
+      fullPath: '/$slug/$teamSlug/chat/'
+      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardChatIndexRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardChatRoute
     }
     '/_authenticated/$slug/$teamSlug/_dashboard/assets/': {
       id: '/_authenticated/$slug/$teamSlug/_dashboard/assets/'
@@ -1425,6 +1496,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$slug/$teamSlug/clusters/$clusterId'
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardRoute
+    }
+    '/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId': {
+      id: '/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId'
+      path: '/$threadId'
+      fullPath: '/$slug/$teamSlug/chat/$threadId'
+      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardChatThreadIdRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardChatRoute
     }
     '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management': {
       id: '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management'
@@ -1646,6 +1724,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedSlugTeamSlugDashboardChatRouteChildren {
+  AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute: typeof AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute
+  AuthenticatedSlugTeamSlugDashboardChatIndexRoute: typeof AuthenticatedSlugTeamSlugDashboardChatIndexRoute
+}
+
+const AuthenticatedSlugTeamSlugDashboardChatRouteChildren: AuthenticatedSlugTeamSlugDashboardChatRouteChildren =
+  {
+    AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute:
+      AuthenticatedSlugTeamSlugDashboardChatThreadIdRoute,
+    AuthenticatedSlugTeamSlugDashboardChatIndexRoute:
+      AuthenticatedSlugTeamSlugDashboardChatIndexRoute,
+  }
+
+const AuthenticatedSlugTeamSlugDashboardChatRouteWithChildren =
+  AuthenticatedSlugTeamSlugDashboardChatRoute._addFileChildren(
+    AuthenticatedSlugTeamSlugDashboardChatRouteChildren,
+  )
+
 interface AuthenticatedSlugTeamSlugDashboardSettingsRouteChildren {
   AuthenticatedSlugTeamSlugDashboardSettingsCustomizationRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsCustomizationRoute
   AuthenticatedSlugTeamSlugDashboardSettingsDangerZoneRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsDangerZoneRoute
@@ -1769,6 +1865,7 @@ const AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
 interface AuthenticatedSlugTeamSlugDashboardRouteChildren {
   AuthenticatedSlugTeamSlugDashboardContentIdRoute: typeof AuthenticatedSlugTeamSlugDashboardContentIdRoute
   AuthenticatedSlugTeamSlugDashboardBillingRoute: typeof AuthenticatedSlugTeamSlugDashboardBillingRoute
+  AuthenticatedSlugTeamSlugDashboardChatRoute: typeof AuthenticatedSlugTeamSlugDashboardChatRouteWithChildren
   AuthenticatedSlugTeamSlugDashboardPlansRoute: typeof AuthenticatedSlugTeamSlugDashboardPlansRoute
   AuthenticatedSlugTeamSlugDashboardSearchRoute: typeof AuthenticatedSlugTeamSlugDashboardSearchRoute
   AuthenticatedSlugTeamSlugDashboardSettingsRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsRouteWithChildren
@@ -1800,6 +1897,8 @@ const AuthenticatedSlugTeamSlugDashboardRouteChildren: AuthenticatedSlugTeamSlug
       AuthenticatedSlugTeamSlugDashboardContentIdRoute,
     AuthenticatedSlugTeamSlugDashboardBillingRoute:
       AuthenticatedSlugTeamSlugDashboardBillingRoute,
+    AuthenticatedSlugTeamSlugDashboardChatRoute:
+      AuthenticatedSlugTeamSlugDashboardChatRouteWithChildren,
     AuthenticatedSlugTeamSlugDashboardPlansRoute:
       AuthenticatedSlugTeamSlugDashboardPlansRoute,
     AuthenticatedSlugTeamSlugDashboardSearchRoute:
@@ -1937,6 +2036,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownOauthAuthorizationServerSplatRoute:
     DotwellKnownOauthAuthorizationServerSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiChatSplatRoute: ApiChatSplatRoute,
   ApiFilesSplatRoute: ApiFilesSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }

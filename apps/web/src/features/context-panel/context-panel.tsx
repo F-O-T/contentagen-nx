@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
-import { Separator } from "@packages/ui/components/separator";
 import {
    Sidebar,
    SidebarContent,
@@ -19,28 +18,18 @@ import { useStore } from "@tanstack/react-store";
 import { Info, MessageSquare, X } from "lucide-react";
 import type React from "react";
 import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
+import { AranduChatTab } from "./ui/arandu-chat-tab";
 import {
    closeContextPanel,
    openContextPanel,
    setActiveTab,
 } from "./use-context-panel";
 
-function ChatPlaceholder() {
-   return (
-      <div className="flex flex-col items-center gap-3 p-6 text-center">
-         <MessageSquare className="size-8 text-muted-foreground/30" />
-         <p className="text-sm text-muted-foreground/60 leading-relaxed">
-            Chat IA contextual em breve.
-         </p>
-      </div>
-   );
-}
-
 const CHAT_TAB: ContextPanelTab = {
    id: "chat",
    icon: MessageSquare,
    label: "Chat IA",
-   content: <ChatPlaceholder />,
+   content: <AranduChatTab />,
    order: 1,
 };
 
@@ -70,13 +59,13 @@ function ContextPanelInner() {
 
    return (
       <Sidebar
-         className="bg-muted rounded-xl"
+         className="px-0"
          collapsible="offcanvas"
          side="right"
          variant="inset"
       >
-         <SidebarHeader className="bg-muted">
-            <div className="flex-row flex items-center gap-2 ">
+         <SidebarHeader className="bg-background rounded-t-xl">
+            <div className="flex-row flex  items-center gap-2 ">
                <TooltipProvider>
                   {allTabs.map((tab) => (
                      <Tooltip key={tab.id}>
@@ -112,12 +101,13 @@ function ContextPanelInner() {
                   </Button>
                </TooltipProvider>
             </div>
-            <Separator />
          </SidebarHeader>
 
          {/* Active tab content — inset rounded card on bg-muted */}
-         <SidebarContent className="rounded-xl bg-background/50 h-full overflow-auto">
-            <div>{activeTab?.content}</div>
+         <SidebarContent className=" overflow-hidden h-full">
+            <div className="h-full rounded-b-xl bg-muted ">
+               {activeTab?.content}
+            </div>
          </SidebarContent>
       </Sidebar>
    );

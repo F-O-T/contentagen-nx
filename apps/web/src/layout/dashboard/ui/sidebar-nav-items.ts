@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-   BarChart3,
    ClipboardList,
    Database,
    FileText,
@@ -12,6 +11,7 @@ import {
    Lightbulb,
    Network,
    PenLine,
+   Sparkles,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
@@ -38,7 +38,7 @@ export type NavItemDef = {
 
 export type NavGroupDef = {
    id: string;
-   label: string;
+   label?: string;
    icon?: LucideIcon;
    items: NavItemDef[];
 };
@@ -46,7 +46,6 @@ export type NavGroupDef = {
 export const navGroups: NavGroupDef[] = [
    {
       id: "main",
-      label: "Principal",
       items: [
          {
             id: "home",
@@ -55,21 +54,40 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/home",
          },
          {
-            id: "forms",
-            label: "Formularios",
-            icon: ClipboardList,
-            route: "/$slug/$teamSlug/forms",
-            quickAction: { type: "create", target: "navigate" },
-            earlyAccessFlag: "forms-beta",
+            id: "chat",
+            label: "Contentta AI",
+            icon: Sparkles,
+            route: "/$slug/$teamSlug/chat",
          },
          {
-            id: "experiments",
-            label: "Experimentos",
-            icon: FlaskConical,
-            route: "/$slug/$teamSlug/experiments",
-            quickAction: { type: "create", target: "sheet" },
-            earlyAccessFlag: "experiments",
-            earlyAccessStage: "alpha" as const,
+            id: "dashboards",
+            label: "Dashboards",
+            icon: LayoutDashboard,
+            route: "/$slug/$teamSlug/analytics/dashboards",
+            quickAction: { type: "create", target: "sub-menu" },
+            subPanel: "dashboards",
+            earlyAccessFlag: "dashboards",
+            earlyAccessStage: "beta" as const,
+         },
+         {
+            id: "insights",
+            label: "Insights",
+            icon: Lightbulb,
+            route: "/$slug/$teamSlug/analytics/insights",
+            quickAction: { type: "create", target: "sub-menu" },
+            subPanel: "insights",
+            earlyAccessFlag: "insights",
+            earlyAccessStage: "beta" as const,
+         },
+         {
+            id: "data-management",
+            label: "Dados",
+            icon: Database,
+            route: "/$slug/$teamSlug/analytics/data-management",
+            quickAction: { type: "create", target: "sub-menu" },
+            subPanel: "data-management",
+            earlyAccessFlag: "data-management",
+            earlyAccessStage: "beta" as const,
          },
       ],
    },
@@ -106,6 +124,29 @@ export const navGroups: NavGroupDef[] = [
       ],
    },
    {
+      id: "ferramentas",
+      label: "Ferramentas",
+      items: [
+         {
+            id: "forms",
+            label: "Formularios",
+            icon: ClipboardList,
+            route: "/$slug/$teamSlug/forms",
+            quickAction: { type: "create", target: "navigate" },
+            earlyAccessFlag: "forms-beta",
+         },
+         {
+            id: "experiments",
+            label: "Experimentos",
+            icon: FlaskConical,
+            route: "/$slug/$teamSlug/experiments",
+            quickAction: { type: "create", target: "sheet" },
+            earlyAccessFlag: "experiments",
+            earlyAccessStage: "alpha" as const,
+         },
+      ],
+   },
+   {
       id: "biblioteca",
       label: "Biblioteca",
       icon: Library,
@@ -117,43 +158,6 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/assets",
             earlyAccessFlag: "asset-bank",
             earlyAccessStage: "alpha",
-         },
-      ],
-   },
-   {
-      id: "analytics",
-      label: "Analytics",
-      icon: BarChart3,
-      items: [
-         {
-            id: "dashboards",
-            label: "Dashboards",
-            icon: LayoutDashboard,
-            route: "/$slug/$teamSlug/analytics/dashboards",
-            quickAction: { type: "create", target: "sub-menu" },
-            subPanel: "dashboards",
-            earlyAccessFlag: "dashboards",
-            earlyAccessStage: "beta" as const,
-         },
-         {
-            id: "insights",
-            label: "Insights",
-            icon: Lightbulb,
-            route: "/$slug/$teamSlug/analytics/insights",
-            quickAction: { type: "create", target: "sub-menu" },
-            subPanel: "insights",
-            earlyAccessFlag: "insights",
-            earlyAccessStage: "beta" as const,
-         },
-         {
-            id: "data-management",
-            label: "Dados",
-            icon: Database,
-            route: "/$slug/$teamSlug/analytics/data-management",
-            quickAction: { type: "create", target: "sub-menu" },
-            subPanel: "data-management",
-            earlyAccessFlag: "data-management",
-            earlyAccessStage: "beta" as const,
          },
       ],
    },

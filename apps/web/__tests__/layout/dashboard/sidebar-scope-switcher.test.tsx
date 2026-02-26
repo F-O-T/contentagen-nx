@@ -76,6 +76,12 @@ vi.mock("@/integrations/orpc/client", () => ({
       },
       session: {
          getSession: {
+            queryOptions: () => ({
+               queryKey: ["session.getSession"],
+               queryFn: async () => ({
+                  user: { name: "Test User", email: "test@test.com", image: null },
+               }),
+            }),
             queryKey: () => ["session.getSession"],
          },
       },
@@ -94,6 +100,7 @@ vi.mock("@tanstack/react-router", () => ({
          },
       },
    }),
+   Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 function renderWithClient() {
@@ -109,6 +116,9 @@ function renderWithClient() {
       { id: "org_1", name: "Acme", slug: "acme-co" },
       { id: "org_2", name: "Beta", slug: "beta-co" },
    ]);
+   queryClient.setQueryData(["session.getSession"], {
+      user: { name: "Test User", email: "test@test.com", image: null },
+   });
 
    return render(
       <QueryClientProvider client={queryClient}>
@@ -122,11 +132,11 @@ function renderWithClient() {
 }
 
 describe("SidebarScopeSwitcher", () => {
-   it("renders separate org and team triggers", () => {
+   it("renders org and team info in trigger", () => {
       renderWithClient();
 
-      expect(screen.getByLabelText(/organizacao/i)).toBeTruthy();
-      expect(screen.getByLabelText(/projeto/i)).toBeTruthy();
+      expect(screen.getByText("Acme")).toBeTruthy();
+      expect(screen.getByText("Core")).toBeTruthy();
    });
 
    it("does not render org id or slug in UI", () => {

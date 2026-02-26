@@ -11,9 +11,11 @@ import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { GlobalContextPanel } from "@/features/context-panel/context-panel";
-import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
+import { useApiErrorTracker } from "@/features/feedback/hooks/use-api-error-tracker";
+import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { useCredenza } from "@/hooks/use-credenza";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { useSafeLocalStorage } from "@/hooks/use-local-storage";
@@ -25,6 +27,28 @@ import { useTabRouterSync } from "../hooks/use-tab-router-sync";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
 import { TabBar } from "./tab-bar";
+
+function AutoBugReporter() {
+   const { openCredenza, closeCredenza } = useCredenza();
+   const { shouldShowBugReport, dismiss } = useApiErrorTracker();
+
+   useEffect(() => {
+      if (shouldShowBugReport) {
+         openCredenza({
+            children: (
+               <BugReportForm
+                  onSuccess={() => {
+                     dismiss();
+                     closeCredenza();
+                  }}
+               />
+            ),
+         });
+      }
+   }, [shouldShowBugReport, openCredenza, closeCredenza, dismiss]);
+
+   return null;
+}
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { activeOrganization } = useActiveOrganization();
@@ -54,6 +78,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
          pathname.split("/").at(-1) ?? "",
       );
+   const isChatPage = pathname.includes("/chat");
 
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
@@ -149,7 +174,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             >
                <SidebarManager
                   name="main"
-                  style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
+                  style={
+                     {
+                        "--sidebar-width": "28rem",
+                     } as React.CSSProperties
+                  }
                >
                   <AppSidebar />
                </SidebarManager>
@@ -167,17 +196,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                      <main
                         className={cn(
                            "relative flex-1",
-                           isEditorPage
+                           isEditorPage || isChatPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
-                                ? "overflow-hidden p-4"
-                                : "overflow-y-auto p-4",
+                                 ? "overflow-hidden p-4"
+                                 : "overflow-y-auto p-4",
                         )}
                      >
                         {children}
                      </main>
                   </div>
-                  <FeedbackFab />
+                  <AutoBugReporter />
                </SidebarInset>
                <GlobalContextPanel />
             </SidebarProvider>

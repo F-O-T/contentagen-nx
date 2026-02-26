@@ -10,8 +10,6 @@ export * from "./schemas/annotations";
 // Assets
 export * from "./schemas/assets";
 export * from "./schemas/auth";
-// Chat schemas
-export * from "./schemas/chat";
 export * from "./schemas/content";
 export * from "./schemas/dashboards";
 // Data sources

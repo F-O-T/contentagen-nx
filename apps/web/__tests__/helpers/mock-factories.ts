@@ -1,6 +1,5 @@
 import type { Action } from "@packages/database/schemas/actions";
 import type { Annotation } from "@packages/database/schemas/annotations";
-import type { ChatMessage } from "@packages/database/schemas/chat";
 import type { Content } from "@packages/database/schemas/content";
 import type { Dashboard } from "@packages/database/schemas/dashboards";
 import type { DataSource } from "@packages/database/schemas/data-sources";
@@ -22,7 +21,6 @@ export const FORM_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
 export const DASHBOARD_ID = "d0d0d0d0-e1e1-4f2f-a3a3-b4b4b4b4b4b4";
 export const INSIGHT_ID = "a0a0a0a0-b1b1-4c2c-a3a3-d4d4d4d4d4d4";
 export const KEY_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
-export const CHAT_SESSION_ID = "chat-sess-0000-0000-0000-000000000001";
 export const ACTION_ID = "a0a0a0a0-b1b1-4c2c-9d3d-f5f5f5f5f5f5";
 export const PROP_DEF_ID = "b1b1b1b1-c2c2-4d3d-a4a4-e5e5e5e5e5e5";
 export const DATA_SOURCE_ID = "c2c2c2c2-d3d3-4e4e-b5b5-f6f6f6f6f6f6";
@@ -151,24 +149,6 @@ export function makePersonalApiKey(
 		lastUsedAt: null,
 		createdAt: new Date("2026-01-15"),
 		expiresAt: null,
-		...overrides,
-	};
-}
-
-export function makeChatMessage(
-	overrides: Partial<ChatMessage> = {},
-): ChatMessage {
-	return {
-		id: "msg-1",
-		sessionId: CHAT_SESSION_ID,
-		role: "user",
-		content: "Hello",
-		messageType: "text",
-		sourceMode: null,
-		selectionContext: null,
-		toolCalls: null,
-		planSteps: null,
-		createdAt: new Date("2026-01-01"),
 		...overrides,
 	};
 }

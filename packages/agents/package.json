@@ -1,9 +1,11 @@
 {
    "dependencies": {
       "@f-o-t/markdown": "catalog:fot",
-      "@mastra/rag": "catalog:mastra",
+      "@mastra/ai-sdk": "catalog:mastra",
       "@mastra/core": "catalog:mastra",
+      "@mastra/memory": "catalog:mastra",
       "@mastra/pg": "catalog:mastra",
+      "@mastra/rag": "catalog:mastra",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
       "@packages/files": "workspace:*",
@@ -46,7 +48,7 @@
       "build": "tsc --build",
       "check": "biome check --write ./src",
       "dev": "dotenv -e .env -- bunx mastra dev",
-      "typecheck": "tsc --noEmit"
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.25.1"

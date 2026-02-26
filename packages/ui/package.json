@@ -2,10 +2,12 @@
    "dependencies": {
       "@ai-sdk/react": "2.0.28",
       "@ariakit/react": "^0.4.21",
+      "@assistant-ui/react": "^0.12.12",
+      "@assistant-ui/react-markdown": "^0.12.5",
       "@emoji-mart/data": "1.2.1",
       "@faker-js/faker": "^10.3.0",
       "@packages/utils": "workspace:*",
-      "@platejs/ai": "^52.1.0",
+      "@platejs/ai": "^52.3.1",
       "@platejs/basic-nodes": "^52.0.11",
       "@platejs/basic-styles": "^52.0.11",
       "@platejs/callout": "^52.0.11",
@@ -21,7 +23,7 @@
       "@platejs/layout": "^52.0.11",
       "@platejs/link": "^52.0.11",
       "@platejs/list": "^52.0.11",
-      "@platejs/markdown": "^52.1.0",
+      "@platejs/markdown": "^52.3.1",
       "@platejs/math": "^52.0.11",
       "@platejs/media": "^52.0.11",
       "@platejs/mention": "^52.0.15",
@@ -71,7 +73,8 @@
       "tailwind-scrollbar-hide": "^4.0.0",
       "tw-animate-css": "catalog:ui",
       "vaul": "catalog:ui",
-      "zod": "catalog:validation"
+      "zod": "catalog:validation",
+      "zustand": "^5.0.11"
    },
    "devDependencies": {
       "bun-types": "latest",

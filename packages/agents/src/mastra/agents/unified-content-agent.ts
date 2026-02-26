@@ -1,4 +1,5 @@
 import { Agent } from "@mastra/core/agent";
+import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
@@ -321,6 +322,17 @@ User: "Revise este conteúdo"
 `;
 };
 
+// ─── Memory Configuration ────────────────────────────────────────────────────
+
+const memory = new Memory({
+   options: {
+      lastMessages: 30,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
+});
+
 // ─── Agent Definition ────────────────────────────────────────────────────────
 
 /**
@@ -352,6 +364,8 @@ export const unifiedContentAgent: Agent = new Agent({
       const language = (requestContext?.get("language") as string) ?? "pt-BR";
       return getUnifiedAgentInstructions(language, writerInstructions);
    },
+
+   memory,
 
    tools: {
       // ─── Memory & RAG ─────────────────────────────────────────────────────

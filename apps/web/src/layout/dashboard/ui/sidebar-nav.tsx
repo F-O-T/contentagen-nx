@@ -13,19 +13,19 @@ import {
 import {
    Link,
    useLocation,
+   useNavigate,
    useParams,
    useRouter,
 } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Search } from "lucide-react";
 import { useCallback } from "react";
-import { useActiveTeam } from "@/hooks/use-active-team";
 import { useEarlyAccess } from "@/hooks/use-early-access";
+import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
 import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 import {
    setActiveSection,
    useSidebarNav,
 } from "@/layout/dashboard/hooks/use-sidebar-nav";
-import { SidebarItemActions } from "@/layout/dashboard/ui/sidebar-item-actions";
 import type {
    NavGroupDef,
    NavItemDef,
@@ -56,7 +56,6 @@ function NavItem({
 
    const handleClick = useCallback(
       (e: React.MouseEvent) => {
-         // If item has a sub-panel, toggle it instead of navigating
          if (item.subPanel) {
             e.preventDefault();
             onSubPanelToggle(item.subPanel);
@@ -102,69 +101,15 @@ function NavItem({
                </Link>
             )}
          </SidebarMenuButton>
-
-         {/* Action buttons — hidden when sidebar is collapsed */}
-         <div className="group-data-[collapsible=icon]:hidden">
-            <SidebarItemActions item={item} />
-         </div>
       </SidebarMenuItem>
    );
 }
 
-function NavGroup({
-   group,
-   slug,
-   teamSlug,
-   isItemActive,
-   onSubPanelToggle,
-   onMainItemClick,
-}: {
-   group: NavGroupDef;
-   slug: string;
-   teamSlug?: string | null;
-   isItemActive: (item: NavItemDef) => boolean;
-   onSubPanelToggle: (section: SubSidebarSection) => void;
-   onMainItemClick: () => void;
-}) {
-   const { isEnrolled } = useEarlyAccess();
-
-   const visibleItems = group.items.filter((item) => {
-      if (!item.earlyAccessFlag) return true;
-      return isEnrolled(item.earlyAccessFlag);
-   });
-
-   if (visibleItems.length === 0) return null;
-
-   return (
-      <SidebarGroup>
-         <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-         <SidebarGroupContent>
-            <SidebarMenu>
-               {visibleItems.map((item) => (
-                  <NavItem
-                     isActive={isItemActive(item)}
-                     item={item}
-                     key={item.id}
-                     onMainItemClick={onMainItemClick}
-                     onSubPanelToggle={onSubPanelToggle}
-                     slug={slug}
-                     teamSlug={teamSlug}
-                  />
-               ))}
-            </SidebarMenu>
-         </SidebarGroupContent>
-      </SidebarGroup>
-   );
-}
-
-export function SidebarNav() {
+function useNavHandlers() {
    const { pathname, searchStr } = useLocation();
-   const params = useParams({
+   const { slug, teamSlug } = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
-   const slug = params.slug ?? pathname.split("/")[1] ?? "";
-   const { activeTeamId } = useActiveTeam();
-   const teamSlug = params.teamSlug ?? activeTeamId ?? null;
    const { activeSection } = useSidebarNav();
    const router = useRouter();
    const manager = useSidebarManager();
@@ -173,11 +118,9 @@ export function SidebarNav() {
       (section: SubSidebarSection) => {
          const subPanel = manager.use("sub-panel");
          if (activeSection === section && subPanel?.open) {
-            // Same section clicked while open — close it
             subPanel.setOpen(false);
             setActiveSection(null);
          } else {
-            // Different section or panel closed — open with new section
             setActiveSection(section);
             if (subPanel && !subPanel.open) {
                subPanel.setOpen(true);
@@ -215,9 +158,140 @@ export function SidebarNav() {
       [router, slug, teamSlug, pathname, searchStr, activeSection],
    );
 
+   return {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   };
+}
+
+export function SidebarDefaultItems() {
+   const {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   } = useNavHandlers();
+   const { pathname } = useLocation();
+   const navigate = useNavigate();
+   const { isEnrolled } = useEarlyAccess();
+
+   const mainGroup = navGroups.find((g) => !g.label);
+   const visibleMainItems = (mainGroup?.items ?? []).filter((item) => {
+      if (!item.earlyAccessFlag) return true;
+      return isEnrolled(item.earlyAccessFlag);
+   });
+
+   const resolvedSlug = slug || pathname.split("/")[1] || "";
+
+   const handleSearch = useCallback(() => {
+      const route = "/$slug/$teamSlug/search";
+      const searchParams = { slug: resolvedSlug, teamSlug: teamSlug ?? "" };
+
+      if (tabStore.state.activeTabId) {
+         replaceCurrentTab({
+            route,
+            params: searchParams,
+            label: "Pesquisar",
+            icon: "Search",
+            type: "search",
+         });
+      }
+
+      navigate({ to: route, params: searchParams });
+   }, [navigate, resolvedSlug, teamSlug]);
+
+   return (
+      <SidebarGroup className="py-0">
+         <SidebarGroupContent>
+            <SidebarMenu>
+               <SidebarMenuItem>
+                  <SidebarMenuButton onClick={handleSearch} tooltip="Pesquisar">
+                     <Search />
+                     <span>Pesquisar</span>
+                  </SidebarMenuButton>
+               </SidebarMenuItem>
+
+               {visibleMainItems.map((item) => (
+                  <NavItem
+                     isActive={isItemActive(item)}
+                     item={item}
+                     key={item.id}
+                     onMainItemClick={handleMainItemClick}
+                     onSubPanelToggle={handleSubPanelToggle}
+                     slug={resolvedSlug}
+                     teamSlug={teamSlug}
+                  />
+               ))}
+            </SidebarMenu>
+         </SidebarGroupContent>
+      </SidebarGroup>
+   );
+}
+
+function NavGroup({
+   group,
+   slug,
+   teamSlug,
+   isItemActive,
+   onSubPanelToggle,
+   onMainItemClick,
+}: {
+   group: NavGroupDef;
+   slug: string;
+   teamSlug?: string | null;
+   isItemActive: (item: NavItemDef) => boolean;
+   onSubPanelToggle: (section: SubSidebarSection) => void;
+   onMainItemClick: () => void;
+}) {
+   const { isEnrolled } = useEarlyAccess();
+
+   const visibleItems = group.items.filter((item) => {
+      if (!item.earlyAccessFlag) return true;
+      return isEnrolled(item.earlyAccessFlag);
+   });
+
+   if (visibleItems.length === 0) return null;
+
+   return (
+      <SidebarGroup>
+         {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+         <SidebarGroupContent>
+            <SidebarMenu>
+               {visibleItems.map((item) => (
+                  <NavItem
+                     isActive={isItemActive(item)}
+                     item={item}
+                     key={item.id}
+                     onMainItemClick={onMainItemClick}
+                     onSubPanelToggle={onSubPanelToggle}
+                     slug={slug}
+                     teamSlug={teamSlug}
+                  />
+               ))}
+            </SidebarMenu>
+         </SidebarGroupContent>
+      </SidebarGroup>
+   );
+}
+
+export function SidebarNav() {
+   const {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   } = useNavHandlers();
+
+   const labeledGroups = navGroups.filter((g) => g.label);
+
    return (
       <>
-         {navGroups.map((group) => (
+         {labeledGroups.map((group) => (
             <NavGroup
                group={group}
                isItemActive={isItemActive}
@@ -225,7 +299,7 @@ export function SidebarNav() {
                onMainItemClick={handleMainItemClick}
                onSubPanelToggle={handleSubPanelToggle}
                slug={slug}
-               teamSlug={teamSlug}
+               teamSlug={teamSlug ?? undefined}
             />
          ))}
       </>
