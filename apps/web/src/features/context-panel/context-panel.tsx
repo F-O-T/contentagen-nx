@@ -18,7 +18,7 @@ import { useStore } from "@tanstack/react-store";
 import { Info, MessageSquare, X } from "lucide-react";
 import type React from "react";
 import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
-import { AranduChatTab } from "./ui/arandu-chat-tab";
+import { TecoChatTab } from "./ui/teco-chat-tab";
 import {
    closeContextPanel,
    openContextPanel,
@@ -29,7 +29,7 @@ const CHAT_TAB: ContextPanelTab = {
    id: "chat",
    icon: MessageSquare,
    label: "Chat IA",
-   content: <AranduChatTab />,
+   content: <TecoChatTab />,
    order: 1,
 };
 

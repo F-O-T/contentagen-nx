@@ -174,7 +174,7 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
 
             {/* Disclaimer */}
             <p className="pb-3 text-center text-[11px] text-muted-foreground/60">
-               Arandu pode cometer erros. Verifique as respostas.
+               Teco pode cometer erros. Verifique as respostas.
             </p>
 
             {/* Quick suggestion chips — flex wrap */}

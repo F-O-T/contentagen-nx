@@ -17,7 +17,8 @@ describe("workspace skill discovery", () => {
 		);
 
 		expect(results.length).toBeGreaterThan(0);
-		const topResult = results[0];
+		// biome-ignore lint/style/noNonNullAssertion: length asserted above
+		const topResult = results[0]!;
 		expect(topResult.score).toBeGreaterThan(0);
 		expect(topResult.content).toBeTruthy();
 		// Top result is /otimizacao-seo/SKILL.md — content contains the skill name and heading
@@ -31,7 +32,8 @@ describe("workspace skill discovery", () => {
 		);
 
 		expect(results.length).toBeGreaterThan(0);
-		const topResult = results[0];
+		// biome-ignore lint/style/noNonNullAssertion: length asserted above
+		const topResult = results[0]!;
 		expect(topResult.score).toBeGreaterThan(0);
 		expect(topResult.content).toBeTruthy();
 		// Top result is a reference file about content prioritization — contains research-adjacent terms
@@ -45,7 +47,8 @@ describe("workspace skill discovery", () => {
 		);
 
 		expect(results.length).toBeGreaterThan(0);
-		const topResult = results[0];
+		// biome-ignore lint/style/noNonNullAssertion: length asserted above
+		const topResult = results[0]!;
 		expect(topResult.score).toBeGreaterThan(0);
 		expect(topResult.content).toBeTruthy();
 		// Top result is /gestao-de-frontmatter/SKILL.md — content contains the skill name and heading
@@ -59,7 +62,8 @@ describe("workspace skill discovery", () => {
 		);
 
 		expect(results.length).toBeGreaterThan(0);
-		const topResult = results[0];
+		// biome-ignore lint/style/noNonNullAssertion: length asserted above
+		const topResult = results[0]!;
 		expect(topResult.score).toBeGreaterThan(0);
 		expect(topResult.content).toBeTruthy();
 		// Top result is /diretrizes-de-escrita/SKILL.md — content contains the skill name and heading

@@ -17,7 +17,7 @@ type RemoteThreadListResponse = Awaited<
    ReturnType<RemoteThreadListAdapter["list"]>
 >;
 
-export function useAranduRuntime({
+export function useTecoRuntime({
    teamId,
    onThreadCreated,
 }: {

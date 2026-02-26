@@ -10,7 +10,7 @@ import {
    useParams,
 } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
-import { Thread } from "@/features/arandu-chat/ui/thread";
+import { Thread } from "@/features/teco-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -80,7 +80,7 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
       <AssistantRuntimeProvider runtime={runtime}>
          <Thread
             quickSuggestions={QUICK_SUGGESTIONS}
-            welcomeIconUrl="/arandu.svg"
+            welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
             welcomeTitle="Como posso te ajudar?"
          />
