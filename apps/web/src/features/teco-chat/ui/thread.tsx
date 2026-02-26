@@ -43,12 +43,13 @@ import {
    SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
    AGENT_DISPLAY_NAMES,
-   agentNetworkStore,
    type AgentStatus,
+   agentNetworkStore,
 } from "@/features/editor/stores/agent-network-store";
+import { type ContextItem, ContextPicker } from "./context-picker";
 
 const MODES = [
    { value: "auto", label: "Auto" },
@@ -103,12 +104,12 @@ export const Thread: FC<ThreadProps> = ({
             <AuiIf condition={(s) => s.thread.isEmpty}>
                <ThreadWelcome
                   iconUrl={welcomeIconUrl}
+                  mode={mode}
+                  onModeChange={handleModeChange}
                   quickSuggestions={quickSuggestions}
                   recentThreadsSlot={recentThreadsSlot}
                   subtitle={welcomeSubtitle}
                   title={welcomeTitle}
-                  mode={mode}
-                  onModeChange={handleModeChange}
                />
             </AuiIf>
 
@@ -272,10 +273,59 @@ interface ComposerProps {
 }
 
 const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
+   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
+   const aui = useAui();
+
+   const handleContextSelect = (item: ContextItem) => {
+      setContextItems((prev) =>
+         prev.some((i) => i.id === item.id) ? prev : [...prev, item],
+      );
+   };
+
+   const removeContextItem = (id: string) => {
+      setContextItems((prev) => prev.filter((i) => i.id !== id));
+   };
+
+   const handleSubmit = () => {
+      if (contextItems.length === 0) return;
+      const contextBlock = contextItems
+         .map((item) => `@${item.label}`)
+         .join(", ");
+      const currentText = aui.composer().getState().text;
+      const separator = currentText.trim() ? "\n\n" : "";
+      aui.composer().setText(
+         `[Contexto: ${contextBlock}]${separator}${currentText}`,
+      );
+      setContextItems([]);
+   };
+
    return (
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
+      <ComposerPrimitive.Root
+         className="aui-composer-root relative flex w-full flex-col"
+         onSubmit={handleSubmit}
+      >
          <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-xl border border-border/60 bg-background/80 px-1 pt-2 shadow-sm outline-none backdrop-blur-sm transition-all has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:shadow-md has-[textarea:focus-visible]:ring-1 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
             <ComposerAttachments />
+            {contextItems.length > 0 && (
+               <div className="flex flex-wrap gap-1 px-3 pt-2">
+                  {contextItems.map((item) => (
+                     <span
+                        className="flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs"
+                        key={item.id}
+                     >
+                        @{item.label}
+                        <button
+                           aria-label="Remover contexto"
+                           className="ml-0.5 text-muted-foreground hover:text-foreground"
+                           onClick={() => removeContextItem(item.id)}
+                           type="button"
+                        >
+                           &times;
+                        </button>
+                     </span>
+                  ))}
+               </div>
+            )}
             <ComposerPrimitive.Input
                aria-label="Campo de mensagem"
                autoFocus
@@ -285,22 +335,25 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
             />
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-2 px-1 pb-2">
-                  <Select value={mode} onValueChange={onModeChange}>
+                  <Select onValueChange={onModeChange} value={mode}>
                      <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs text-muted-foreground shadow-none hover:bg-accent">
                         <SelectValue />
                      </SelectTrigger>
                      <SelectContent align="start">
                         {MODES.map((m) => (
                            <SelectItem
+                              className="text-xs"
                               key={m.value}
                               value={m.value}
-                              className="text-xs"
                            >
                               {m.label}
                            </SelectItem>
                         ))}
                      </SelectContent>
                   </Select>
+                  <Suspense fallback={null}>
+                     <ContextPicker onSelect={handleContextSelect} />
+                  </Suspense>
                </div>
                <ComposerAction />
             </div>
@@ -558,7 +611,7 @@ const AgentNetworkStatus: FC = () => {
 
          <div className="ml-3 flex flex-col gap-1 border-l border-border/40 pl-2.5">
             {agents.map((agent) => (
-               <AgentRow key={agent.id} id={agent.id} status={agent.status} />
+               <AgentRow id={agent.id} key={agent.id} status={agent.status} />
             ))}
          </div>
       </div>
