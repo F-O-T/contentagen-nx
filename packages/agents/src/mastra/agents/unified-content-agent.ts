@@ -6,6 +6,7 @@ import {
    buildLanguageInstruction,
    compileInstructionMemories,
 } from "../../utils";
+import { workspace } from "../workspace";
 // ─── Analysis Tools ──────────────────────────────────────────────────────────
 import { badPatternTool } from "../tools/analysis/bad-pattern-tool";
 import { citationTool } from "../tools/analysis/citation-tool";
@@ -366,6 +367,8 @@ export const unifiedContentAgent: Agent = new Agent({
    },
 
    memory,
+
+   workspace,
 
    tools: {
       // ─── Memory & RAG ─────────────────────────────────────────────────────
