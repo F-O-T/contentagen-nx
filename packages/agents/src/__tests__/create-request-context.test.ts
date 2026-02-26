@@ -1,17 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import type { RequestContext } from "@mastra/core/request-context";
-import type { CustomRequestContext } from "../mastra/index";
-
-// Mock environment and heavy Mastra dependencies before any import
-mock.module("@packages/environment/server", () => ({
-   env: { PG_VECTOR_URL: "postgresql://localhost/test" },
-}));
-
-mock.module("@mastra/pg", () => ({
-   PostgresStore: class {
-      constructor() {}
-   },
-}));
+// Mocks for @packages/environment/server, @mastra/pg, and ../utils are provided
+// by the global preload in bunfig.toml (workspace-mocks.ts). Only mocks that are
+// not already covered by the preload are declared here.
 
 mock.module("../mastra/agents/fim-agent", () => ({
    fimAgent: { name: "FIM Agent" },
@@ -25,32 +16,18 @@ mock.module("../mastra/agents/unified-content-agent", () => ({
    unifiedContentAgent: { name: "Unified Content Agent" },
 }));
 
-mock.module("../utils", () => ({
-   pgVectorStore: {},
-   embeddingModel: {},
-   disconnectVectorStore: async () => {},
-   buildLanguageInstruction: () => "",
-   compileInstructionMemories: () => "",
-}));
+// @mastra/core/mastra is also mocked via the preload (workspace-mocks.ts).
+// The preload mock runs first; this file relies on it for static imports of ../mastra/index.
 
-mock.module("@mastra/core/mastra", () => ({
-   Mastra: class {
-      constructor() {}
-   },
-}));
+import type { CustomRequestContext } from "../mastra/index";
+import { createRequestContext } from "../mastra/index";
 
-// Now import after mocking — cast to the real type for type-safe test assertions
-const module = (await import(
-   "../mastra/index"
-)) as unknown as typeof import("../mastra/index");
 // Helper to type ctx correctly at call sites
 const createCtx = (
    params: CustomRequestContext,
 ): RequestContext<CustomRequestContext> =>
    // biome-ignore lint/suspicious/noExplicitAny: runtime value is the real RequestContext despite mock cast
-   module.createRequestContext(
-      params,
-   ) as any as RequestContext<CustomRequestContext>;
+   createRequestContext(params) as any as RequestContext<CustomRequestContext>;
 
 // Use .all to read the typed context object and avoid bun:test overload resolution
 // issues with RequestContext.get()'s generic return type.

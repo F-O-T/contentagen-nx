@@ -26,3 +26,11 @@ mock.module("../utils", () => ({
 	buildLanguageInstruction: () => "",
 	compileInstructionMemories: () => "",
 }));
+
+// Mock Mastra constructor so index.ts can be statically imported without
+// triggering pgVectorStore.__setLogger (only present on real PgVector instances).
+mock.module("@mastra/core/mastra", () => ({
+	Mastra: class {
+		constructor() {}
+	},
+}));
