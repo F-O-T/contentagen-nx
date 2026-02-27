@@ -2,27 +2,6 @@ import { cn } from "@packages/ui/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-export function ContextPanelSection({
-   title,
-   children,
-   className,
-}: {
-   title?: string;
-   children: ReactNode;
-   className?: string;
-}) {
-   return (
-      <div className={cn("flex flex-col", className)}>
-         {title && (
-            <div className="bg-muted/50 border-b px-3 py-2 text-xs font-semibold text-foreground">
-               {title}
-            </div>
-         )}
-         <div className="flex flex-col py-1">{children}</div>
-      </div>
-   );
-}
-
 export function ContextPanelAction({
    icon: Icon,
    label,
