@@ -11,6 +11,7 @@ import {
    CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
 import { cn } from "@packages/ui/lib/utils";
+import { TOOL_DISPLAY_LABELS } from "./tool-display-labels";
 import {
    AlertCircleIcon,
    CheckIcon,
@@ -106,6 +107,7 @@ function ToolFallbackTrigger({
 
    const Icon = statusIconMap[statusType];
    const label = isCancelled ? "Ferramenta cancelada" : "Ferramenta usada";
+   const displayName = TOOL_DISPLAY_LABELS[toolName] ?? toolName;
 
    return (
       <CollapsibleTrigger
@@ -132,7 +134,7 @@ function ToolFallbackTrigger({
             data-slot="tool-fallback-trigger-label"
          >
             <span>
-               {label}: <b>{toolName}</b>
+               {label}: <b>{displayName}</b>
             </span>
             {isRunning && (
                <span
@@ -140,7 +142,7 @@ function ToolFallbackTrigger({
                   className="aui-tool-fallback-trigger-shimmer shimmer pointer-events-none absolute inset-0 motion-reduce:animate-none"
                   data-slot="tool-fallback-trigger-shimmer"
                >
-                  {label}: <b>{toolName}</b>
+                  {label}: <b>{displayName}</b>
                </span>
             )}
          </span>
