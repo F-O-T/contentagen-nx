@@ -7,9 +7,12 @@ import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { PageHeader } from "@/components/page-header";
 import {
-   ContextPanelAction,
-   ContextPanelSection,
-} from "@/features/context-panel/context-panel-info";
+	ContextPanel,
+	ContextPanelContent,
+	ContextPanelHeader,
+	ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
@@ -44,19 +47,24 @@ function FormsPage() {
    const navigate = useNavigate();
 
    useContextPanelInfo(
-      <ContextPanelSection title="Ações">
-         <ContextPanelAction
-            icon={Plus}
-            label="Novo formulário"
-            onClick={() =>
-               navigate({
-                  to: "/$slug/$teamSlug/forms/$formId",
-                  params: { slug, teamSlug, formId: "new" },
-               })
-            }
-         />
-      </ContextPanelSection>,
-   );
+		<ContextPanel>
+			<ContextPanelHeader>
+				<ContextPanelTitle>Ações</ContextPanelTitle>
+			</ContextPanelHeader>
+			<ContextPanelContent>
+				<ContextPanelAction
+					icon={Plus}
+					label="Novo formulário"
+					onClick={() =>
+						navigate({
+							to: "/$slug/$teamSlug/forms/$formId",
+							params: { slug, teamSlug, formId: "new" },
+						})
+					}
+				/>
+			</ContextPanelContent>
+		</ContextPanel>,
+	);
 
    return (
       <main className="flex flex-col gap-4">
