@@ -1,13 +1,26 @@
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import { CheckCheck, Pause, Play, Trash2 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
 import { orpc } from "@/integrations/orpc/client";
+import {
+   ContextPanelAction,
+   ContextPanelDivider,
+   ContextPanelMeta,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import {
    type ExperimentStatus,
    useExperimentConfig,
@@ -16,6 +29,26 @@ import { ExperimentBuilderHeader } from "./experiment-builder-header";
 import { ExperimentConfigTab } from "./experiment-config-tab";
 import { ExperimentResultsTab } from "./experiment-results-tab";
 import { ExperimentVariantsTab } from "./experiment-variants-tab";
+
+const TARGET_TYPE_LABELS: Record<string, string> = {
+   content: "Conteúdo",
+   form: "Formulário",
+   cluster: "Cluster",
+};
+
+const GOAL_LABELS: Record<string, string> = {
+   conversion: "Conversão",
+   ctr: "Taxa de clique",
+   time_on_page: "Tempo na página",
+   form_submit: "Envio de formulário",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+   draft: "Rascunho",
+   running: "Em execução",
+   paused: "Pausado",
+   concluded: "Concluído",
+};
 
 const TABS = [
    { value: "config", label: "Configuração" },
@@ -104,6 +137,8 @@ function ExperimentBuilderEditContent({
    const status = experiment.status as ExperimentStatus;
    const canEdit = status === "draft" || status === "paused";
    const variantCount = experiment.variants?.length ?? 0;
+   const isRunning = status === "running";
+   const canStart = (status === "draft" || status === "paused") && variantCount >= 2;
 
    const updateMutation = useMutation(
       orpc.experiments.update.mutationOptions({
@@ -144,6 +179,57 @@ function ExperimentBuilderEditContent({
          },
          onError: (err) => toast.error(err.message ?? "Erro ao excluir"),
       }),
+   );
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>{experiment.name}</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelMeta
+               label="Status"
+               value={STATUS_LABELS[experiment.status] ?? experiment.status}
+            />
+            <ContextPanelMeta
+               label="Tipo"
+               value={TARGET_TYPE_LABELS[experiment.targetType] ?? experiment.targetType}
+            />
+            <ContextPanelMeta
+               label="Meta"
+               value={GOAL_LABELS[experiment.goal] ?? experiment.goal}
+            />
+            <ContextPanelMeta label="Variantes" value={variantCount} />
+            <ContextPanelDivider />
+            {canStart && (
+               <ContextPanelAction
+                  icon={Play}
+                  label="Iniciar"
+                  onClick={() => startMutation.mutate({ id: experimentId })}
+               />
+            )}
+            {isRunning && (
+               <ContextPanelAction
+                  icon={Pause}
+                  label="Pausar"
+                  onClick={() => pauseMutation.mutate({ id: experimentId })}
+               />
+            )}
+            {(isRunning || status === "paused") && (
+               <ContextPanelAction
+                  icon={CheckCheck}
+                  label="Concluir"
+                  onClick={() => concludeMutation.mutate({ id: experimentId })}
+               />
+            )}
+            <ContextPanelAction
+               icon={Trash2}
+               label="Excluir experimento"
+               onClick={() => removeMutation.mutate({ id: experimentId })}
+               variant="destructive"
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    const handleSave = useCallback(() => {
