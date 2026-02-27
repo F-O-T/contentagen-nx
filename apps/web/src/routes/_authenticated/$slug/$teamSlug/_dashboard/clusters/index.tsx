@@ -10,9 +10,9 @@ import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { PageHeader } from "@/components/page-header";
+import { ClustersListSection } from "@/features/clusters/ui/clusters-list-section";
 import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
-import { ClustersListSection } from "@/features/clusters/ui/clusters-list-section";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/clusters/",

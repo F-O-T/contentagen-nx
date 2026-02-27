@@ -1,19 +1,13 @@
 import type { InsightConfig } from "@packages/analytics/types";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
    ContextPanel,
    ContextPanelContent,
    ContextPanelHeader,
    ContextPanelTitle,
 } from "@packages/ui/components/context-panel";
-import {
-   ContextPanelAction,
-   ContextPanelDivider,
-   ContextPanelMeta,
-} from "@/features/context-panel/context-panel-info";
-import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Clock, Copy, RefreshCw, Tag, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -22,6 +16,12 @@ import {
    useInsightConfig,
 } from "@/features/analytics/hooks/use-insight-config";
 import { InsightBuilder } from "@/features/analytics/ui/insight-builder";
+import {
+   ContextPanelAction,
+   ContextPanelDivider,
+   ContextPanelMeta,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
@@ -187,7 +187,9 @@ function EditInsightPage() {
       insight ? (
          <ContextPanel>
             <ContextPanelHeader>
-               <ContextPanelTitle>{insightName || insight.name}</ContextPanelTitle>
+               <ContextPanelTitle>
+                  {insightName || insight.name}
+               </ContextPanelTitle>
             </ContextPanelHeader>
             <ContextPanelContent>
                <ContextPanelMeta
@@ -202,7 +204,11 @@ function EditInsightPage() {
                      insight.lastComputedAt
                         ? new Date(insight.lastComputedAt).toLocaleDateString(
                              "pt-BR",
-                             { day: "2-digit", month: "short", year: "numeric" },
+                             {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                             },
                           )
                         : "—"
                   }

@@ -38,10 +38,11 @@ export const clearInfoContent = () =>
    contextPanelStore.setState((s) => ({ ...s, infoContent: null }));
 
 export const useContextPanelInfo = (content: React.ReactNode) => {
+   // biome-ignore lint/correctness/useExhaustiveDependencies: content is intentionally stable on mount
    useEffect(() => {
       setInfoContent(content);
       return () => clearInfoContent();
-   }, [content]);
+   }, []);
 };
 
 export const useContextPanel = () => {

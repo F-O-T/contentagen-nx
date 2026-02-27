@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@packages/ui/components/button";
+import { Button, type buttonVariants } from "@packages/ui/components/button";
 import {
    Item,
    ItemActions,
@@ -7,7 +7,7 @@ import {
    ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
-import { type VariantProps } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 

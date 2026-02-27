@@ -1,26 +1,35 @@
+import { Button } from "@packages/ui/components/button";
 import {
    ContextPanel,
    ContextPanelContent,
    ContextPanelHeader,
    ContextPanelTitle,
 } from "@packages/ui/components/context-panel";
-import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { Activity, CheckCheck, GitBranch, Pause, Play, Tag, Target, Trash2 } from "lucide-react";
+import {
+   Activity,
+   CheckCheck,
+   GitBranch,
+   Pause,
+   Play,
+   Tag,
+   Target,
+   Trash2,
+} from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { orpc } from "@/integrations/orpc/client";
 import {
    ContextPanelAction,
    ContextPanelDivider,
    ContextPanelMeta,
 } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import { orpc } from "@/integrations/orpc/client";
 import {
    type ExperimentStatus,
    useExperimentConfig,
@@ -138,7 +147,8 @@ function ExperimentBuilderEditContent({
    const canEdit = status === "draft" || status === "paused";
    const variantCount = experiment.variants?.length ?? 0;
    const isRunning = status === "running";
-   const canStart = (status === "draft" || status === "paused") && variantCount >= 2;
+   const canStart =
+      (status === "draft" || status === "paused") && variantCount >= 2;
 
    const updateMutation = useMutation(
       orpc.experiments.update.mutationOptions({
@@ -195,14 +205,21 @@ function ExperimentBuilderEditContent({
             <ContextPanelMeta
                icon={Tag}
                label="Tipo"
-               value={TARGET_TYPE_LABELS[experiment.targetType] ?? experiment.targetType}
+               value={
+                  TARGET_TYPE_LABELS[experiment.targetType] ??
+                  experiment.targetType
+               }
             />
             <ContextPanelMeta
                icon={Target}
                label="Meta"
                value={GOAL_LABELS[experiment.goal] ?? experiment.goal}
             />
-            <ContextPanelMeta icon={GitBranch} label="Variantes" value={variantCount} />
+            <ContextPanelMeta
+               icon={GitBranch}
+               label="Variantes"
+               value={variantCount}
+            />
             <ContextPanelDivider />
             {canStart && (
                <ContextPanelAction

@@ -5,11 +5,10 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
 import { useCallback, useRef, useState } from "react";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
-import { EditorMetaPanel } from "./editor-meta-panel";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
 import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
-
+import { EditorMetaPanel } from "./editor-meta-panel";
 
 type ContentStatus = "draft" | "published" | "archived";
 
@@ -70,7 +69,10 @@ export function EditorPage({ contentId }: EditorPageProps) {
          setMeta(values);
          await updateMutation.mutateAsync({
             id: contentId,
-            data: { meta: values, body: JSON.stringify(editorValueRef.current) },
+            data: {
+               meta: values,
+               body: JSON.stringify(editorValueRef.current),
+            },
          });
       },
       [contentId, updateMutation],

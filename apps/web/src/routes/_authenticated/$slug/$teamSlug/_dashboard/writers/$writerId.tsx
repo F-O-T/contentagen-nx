@@ -121,10 +121,16 @@ function EditWriterPage() {
       writer ? (
          <ContextPanel>
             <ContextPanelHeader>
-               <ContextPanelTitle>{writer.personaConfig.metadata.name}</ContextPanelTitle>
+               <ContextPanelTitle>
+                  {writer.personaConfig.metadata.name}
+               </ContextPanelTitle>
             </ContextPanelHeader>
             <ContextPanelContent>
-               <ContextPanelMeta icon={FileText} label="Conteúdos" value={writer.contentCount ?? 0} />
+               <ContextPanelMeta
+                  icon={FileText}
+                  label="Conteúdos"
+                  value={writer.contentCount ?? 0}
+               />
                <ContextPanelDivider />
                <ContextPanelAction
                   icon={Trash2}

@@ -1,4 +1,5 @@
 import type { ContentMeta } from "@packages/database/schemas/content";
+import { Button } from "@packages/ui/components/button";
 import {
    ContextPanel,
    ContextPanelContent,
@@ -12,7 +13,6 @@ import {
    FieldGroup,
    FieldLabel,
 } from "@packages/ui/components/field";
-import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { MultiSelect } from "@packages/ui/components/multi-select";
 import { Textarea } from "@packages/ui/components/textarea";

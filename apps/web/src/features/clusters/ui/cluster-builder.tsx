@@ -1,6 +1,12 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Label } from "@packages/ui/components/label";
 import { Separator } from "@packages/ui/components/separator";
 import {
@@ -30,12 +36,6 @@ import {
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import {
-   ContextPanel,
-   ContextPanelContent,
-   ContextPanelHeader,
-   ContextPanelTitle,
-} from "@packages/ui/components/context-panel";
 import {
    ContextPanelAction,
    ContextPanelDivider,
@@ -521,7 +521,9 @@ function ClusterBuilderEdit({ clusterId }: ClusterBuilderEditProps) {
    useContextPanelInfo(
       <ContextPanel>
          <ContextPanelHeader>
-            <ContextPanelTitle>{pillarTitle || cluster.meta.title}</ContextPanelTitle>
+            <ContextPanelTitle>
+               {pillarTitle || cluster.meta.title}
+            </ContextPanelTitle>
          </ContextPanelHeader>
          <ContextPanelContent>
             <ContextPanelMeta

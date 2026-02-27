@@ -156,8 +156,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                            isEditorPage || isChatPage
                               ? "overflow-hidden "
                               : isSettingsPage
-                                 ? "overflow-hidden p-4"
-                                 : "overflow-y-auto p-4",
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
                         )}
                      >
                         {children}

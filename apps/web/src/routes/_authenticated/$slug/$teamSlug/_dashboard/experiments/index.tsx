@@ -1,11 +1,11 @@
-import { createErrorFallback } from "@packages/ui/components/error-fallback";
-import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    ContextPanel,
    ContextPanelContent,
    ContextPanelHeader,
    ContextPanelTitle,
 } from "@packages/ui/components/context-panel";
+import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
