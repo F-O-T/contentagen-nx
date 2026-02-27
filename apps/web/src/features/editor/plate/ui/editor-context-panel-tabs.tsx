@@ -7,6 +7,12 @@ import {
    registerTab,
    unregisterTab,
 } from "@/features/context-panel/use-context-panel";
+import {
+	ContextPanel,
+	ContextPanelContent,
+	ContextPanelHeader,
+	ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { FrontmatterSection } from "../../ui/frontmatter-section";
 import { InternalLinksSidebar } from "./internal-links-sidebar";
 
@@ -30,11 +36,18 @@ export function EditorContextPanelTabs({
          icon: Settings2,
          label: "Metadados",
          content: (
-            <FrontmatterSection
-               meta={meta}
-               onChange={onChange}
-               readOnly={readOnly}
-            />
+            <ContextPanel>
+               <ContextPanelHeader>
+                  <ContextPanelTitle>Metadados</ContextPanelTitle>
+               </ContextPanelHeader>
+               <ContextPanelContent>
+                  <FrontmatterSection
+                     meta={meta}
+                     onChange={onChange}
+                     readOnly={readOnly}
+                  />
+               </ContextPanelContent>
+            </ContextPanel>
          ),
          order: 1,
       });
@@ -46,7 +59,16 @@ export function EditorContextPanelTabs({
          id: "links",
          icon: Link2,
          label: "Links do Cluster",
-         content: <InternalLinksSidebar contentId={contentId} />,
+         content: (
+            <ContextPanel>
+               <ContextPanelHeader>
+                  <ContextPanelTitle>Links do Cluster</ContextPanelTitle>
+               </ContextPanelHeader>
+               <ContextPanelContent>
+                  <InternalLinksSidebar contentId={contentId} />
+               </ContextPanelContent>
+            </ContextPanel>
+         ),
          order: 2,
       });
       return () => {
