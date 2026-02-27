@@ -21,7 +21,6 @@ import { useLastOrganization } from "@/hooks/use-last-organization";
 import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
-import { setActiveSection } from "../hooks/use-sidebar-nav";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
 
@@ -129,18 +128,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       activeOrganization?.slug,
    ]);
 
-   useEffect(() => {
-      if (pathname.includes("/analytics/dashboards")) {
-         setActiveSection("dashboards");
-      } else if (pathname.includes("/analytics/insights")) {
-         setActiveSection("insights");
-      } else if (pathname.includes("/analytics/data-management")) {
-         setActiveSection("data-management");
-      } else {
-         setActiveSection(null);
-      }
-   }, [pathname]);
-
    return (
       <EarlyAccessProvider>
          <SidebarManagerProvider>
@@ -169,8 +156,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                            isEditorPage || isChatPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
-                                 ? "overflow-hidden p-4"
-                                 : "overflow-y-auto p-4",
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
                         )}
                      >
                         {children}
