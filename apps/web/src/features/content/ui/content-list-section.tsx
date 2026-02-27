@@ -25,7 +25,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Row } from "@tanstack/react-table";
 import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
@@ -88,9 +88,9 @@ export function ContentListSection() {
    );
 
    // Live query — always called unconditionally (React rules of hooks)
-   const { data: rawRows } = useLiveQuery(
-      (q) => q.from({ content: collection }),
-      [collection],
+   const { data: rawRows, isLoading } = useLiveQuery(
+      (q) => teamId ? q.from({ content: collection }) : null,
+      [collection, teamId],
    );
    const rawItems: ContentRow[] = (rawRows ?? []) as unknown as ContentRow[];
 
@@ -174,28 +174,40 @@ export function ContentListSection() {
    }, [allItems, searchQuery]);
 
    // Action handlers
-   const handleView = (content: ContentItem) => {
-      navigate({
-         to: "/$slug/$teamSlug/$contentId",
-         params: {
-            slug: slug,
-            teamSlug: teamSlug,
-            contentId: content.id,
-         },
-      });
-   };
+   const handleView = useCallback(
+      (content: ContentItem) => {
+         navigate({
+            to: "/$slug/$teamSlug/$contentId",
+            params: {
+               slug: slug,
+               teamSlug: teamSlug,
+               contentId: content.id,
+            },
+         });
+      },
+      [navigate, slug, teamSlug],
+   );
 
-   const handlePublish = (content: ContentItem) => {
-      publishMutation.mutate({ id: content.id });
-   };
+   const handlePublish = useCallback(
+      (content: ContentItem) => {
+         publishMutation.mutate({ id: content.id });
+      },
+      [publishMutation],
+   );
 
-   const handleArchive = (content: ContentItem) => {
-      archiveMutation.mutate({ id: content.id });
-   };
+   const handleArchive = useCallback(
+      (content: ContentItem) => {
+         archiveMutation.mutate({ id: content.id });
+      },
+      [archiveMutation],
+   );
 
-   const handleDelete = (content: ContentItem) => {
-      deleteMutation.mutate({ id: content.id });
-   };
+   const handleDelete = useCallback(
+      (content: ContentItem) => {
+         deleteMutation.mutate({ id: content.id });
+      },
+      [deleteMutation],
+   );
 
    const handleCreateNew = () => {
       createContentMutation.mutate({
@@ -278,7 +290,12 @@ export function ContentListSection() {
    const totalPages = Math.ceil(totalCount / pageSize);
 
    const hasContent = rawItems.length > 0;
+   const isLoadingContent = isLoading && rawItems.length === 0;
    const hasFilteredContent = filteredContent.length > 0;
+
+   if (isLoadingContent) {
+      return null;
+   }
 
    if (!hasContent) {
       return (
