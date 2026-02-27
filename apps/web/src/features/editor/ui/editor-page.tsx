@@ -1,28 +1,56 @@
 "use client";
 
 import type { ContentMeta } from "@packages/database/schemas/content";
+import { useLiveQuery } from "@tanstack/react-db";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import {
+   createContentCollection,
+   type ContentRow,
+} from "@/features/content/collections/content-collection";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
 import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
 import { EditorMetaPanel } from "./editor-meta-panel";
+import { WriterPromptBanner } from "./writer-prompt-banner";
 
 type ContentStatus = "draft" | "published" | "archived";
 
 interface EditorPageProps {
    contentId: string;
+   teamId: string;
 }
 
-export function EditorPage({ contentId }: EditorPageProps) {
-   const { data: content } = useSuspenseQuery(
+export function EditorPage({ contentId, teamId }: EditorPageProps) {
+   // Electric collection scoped to this team — memoized so it's stable across renders.
+   const collection = useMemo(
+      () => (teamId ? createContentCollection(teamId) : null),
+      [teamId],
+   );
+
+   // Live query — updates instantly when status changes (e.g. agent publishes content).
+   const { data: liveRows, isReady } = useLiveQuery(
+      (q) => (collection ? q.from({ content: collection }) : null),
+      [collection],
+   );
+
+   // Find this specific content row from the live collection.
+   const liveContent: ContentRow | null = isReady
+      ? ((liveRows ?? []).find((row) => row.id === contentId) ?? null)
+      : null;
+
+   // HTTP fallback — used for initial load and while Electric syncs its first snapshot.
+   const { data: httpContent } = useSuspenseQuery(
       orpc.content.getById.queryOptions({ input: { id: contentId } }),
    );
 
+   // Status — prefer live for real-time collaboration updates; fall back to HTTP.
+   const liveStatus = (liveContent?.status ?? httpContent.status) as ContentStatus;
+
    const [meta, setMeta] = useState<ContentMeta>(
-      () => content.meta ?? { title: "", description: "", slug: "" },
+      () => httpContent.meta ?? { title: "", description: "", slug: "" },
    );
    const [isSaving, setIsSaving] = useState(false);
 
@@ -78,16 +106,31 @@ export function EditorPage({ contentId }: EditorPageProps) {
       [contentId, updateMutation],
    );
 
-   useContextPanelInfo(<EditorMetaPanel meta={meta} onSave={handleMetaSave} />);
+   useEffect(() => {
+      const listener = () => {
+         handleSave();
+      };
+      window.addEventListener("editor-bridge-save", listener);
+      return () => {
+         window.removeEventListener("editor-bridge-save", listener);
+      };
+   }, [handleSave]);
+
+   useContextPanelInfo(
+      <>
+         <WriterPromptBanner contentId={contentId} writerId={httpContent.writerId} />
+         <EditorMetaPanel meta={meta} onSave={handleMetaSave} />
+      </>,
+   );
 
    return (
       <div className="flex h-full flex-col">
          <EditorContextPanelTabs contentId={contentId} />
          <PlateEditor
             contentId={contentId}
-            editable={content.status !== "archived"}
+            editable={liveStatus !== "archived"}
             initialValue={
-               content?.body ? (JSON.parse(content.body) as Value) : undefined
+               httpContent?.body ? (JSON.parse(httpContent.body) as Value) : undefined
             }
             isSaving={isSaving}
             key={contentId}
@@ -96,9 +139,9 @@ export function EditorPage({ contentId }: EditorPageProps) {
             }}
             onSave={handleSave}
             onStatusChange={handleStatusChange}
-            status={content.status as ContentStatus}
-            teamId={content.teamId ?? undefined}
-            writerId={content.writerId ?? undefined}
+            status={liveStatus}
+            teamId={httpContent.teamId ?? undefined}
+            writerId={httpContent.writerId ?? undefined}
          />
       </div>
    );

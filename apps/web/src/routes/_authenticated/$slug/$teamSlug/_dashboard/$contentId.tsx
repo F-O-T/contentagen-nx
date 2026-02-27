@@ -4,18 +4,28 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { EditorPage } from "@/features/editor/ui/editor-page";
+import {
+   resetChatContext,
+   setChatContext,
+} from "@/features/teco-chat/stores/chat-context-store";
+import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/$contentId",
 )({
-   ssr: false,
    beforeLoad: async ({ context, params }) => {
       await context.queryClient.prefetchQuery(
          orpc.content.getById.queryOptions({
             input: { id: params.contentId },
          }),
       );
+   },
+   loader: ({ params }) => {
+      setChatContext("content", params.contentId);
+   },
+   onLeave: () => {
+      resetChatContext();
    },
    component: EditorRoute,
 });
@@ -95,11 +105,13 @@ function EditorSkeleton() {
 
 function EditorRoute() {
    const { contentId } = Route.useParams();
+   // useActiveTeam uses useSuspenseQuery — safe here because EditorPage is inside a Suspense boundary.
+   const { activeTeamId } = useActiveTeam();
 
    return (
       <ErrorBoundary FallbackComponent={EditorErrorFallback}>
          <Suspense fallback={<EditorSkeleton />}>
-            <EditorPage contentId={contentId} />
+            <EditorPage contentId={contentId} teamId={activeTeamId ?? ""} />
          </Suspense>
       </ErrorBoundary>
    );
