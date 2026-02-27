@@ -1,4 +1,5 @@
-import { createRequestContext, handleChatStream, mastra } from "@packages/agents";
+import { createRequestContext, handleChatStream, handleWorkflowStream, mastra } from "@packages/agents";
+import type { RequestContext } from "@packages/agents";
 import { getContentById, updateContent } from "@packages/database/repositories/content-repository";
 import { getWriterInstructions } from "@packages/database/repositories/writer-instructions-repository";
 import type { ContentMeta } from "@packages/database/schemas/content";
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/api/chat/$")({
             const teamId = session.session.activeTeamId;
             const userId = session.session.userId;
             const body = await request.json();
-            const { messages, threadId, router = "auto", contextId } = body;
+            const { messages, threadId, router = "auto", contextId, workflow } = body;
             const resourceId = `${teamId}:${userId}`;
 
             function extractMarkdown(
@@ -116,6 +117,46 @@ export const Route = createFileRoute("/api/chat/$")({
                   });
                }
             }
+
+            // ── Workflow path ──────────────────────────────────────────────────────────
+            if (workflow === "content-creation" && contextId) {
+               const lastUserMessage = [...messages]
+                  .reverse()
+                  .find((m: ModelMessage) => m.role === "user");
+               const topic =
+                  typeof lastUserMessage?.content === "string"
+                     ? lastUserMessage.content
+                     : "Untitled article";
+
+               const contentCtx = await loadContentContext(db, contextId);
+
+               const workflowStream = await handleWorkflowStream({
+                  mastra,
+                  workflowId: "content-creation",
+                  params: {
+                     inputData: { topic },
+                     requestContext: createRequestContext({
+                        userId,
+                        ...contentCtx,
+                        onBodyUpdate,
+                        onMetaUpdate,
+                     }) as RequestContext,
+                  },
+               });
+
+               const filteredWorkflowStream = workflowStream.pipeThrough(
+                  new TransformStream({
+                     transform(chunk, controller) {
+                        const type = (chunk as { type?: string }).type;
+                        if (typeof type === "string" && type.startsWith("data-")) return;
+                        controller.enqueue(chunk);
+                     },
+                  }),
+               );
+
+               return createUIMessageStreamResponse({ stream: filteredWorkflowStream });
+            }
+            // ── End workflow path ───────────────────────────────────────────────────────
 
             const stream = await handleChatStream({
                mastra,
