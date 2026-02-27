@@ -27,7 +27,7 @@ function extractPreview(argsText: string | undefined): string | null {
                 ? args.suggestion
                 : null;
     if (!text) return null;
-    const clean = text.replace(/#+\s*/g, "").replace(/\n+/g, " ").trim();
+    const clean = text.replace(/^#+\s*/gm, "").replace(/\n+/g, " ").trim();
     return clean.length > 60 ? `${clean.slice(0, 60)}…` : clean;
   } catch {
     return null;
