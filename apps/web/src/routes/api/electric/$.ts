@@ -98,7 +98,13 @@ async function handle({
 	// Proxy the request to Electric Sync Engine
 	// Pass through the streaming body (SSE / chunked transfer for live mode)
 	const electricUrl = `${env.ELECTRIC_URL}/v1/shape?${electricParams}`;
-	const electricResponse = await fetch(electricUrl, { cache: "no-store" });
+
+	let electricResponse: Response;
+	try {
+		electricResponse = await fetch(electricUrl, { cache: "no-store" });
+	} catch {
+		return new Response("Electric Sync Engine unavailable", { status: 503 });
+	}
 
 	return new Response(electricResponse.body, {
 		status: electricResponse.status,
