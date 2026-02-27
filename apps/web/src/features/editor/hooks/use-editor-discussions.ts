@@ -17,7 +17,7 @@ export function useEditorDiscussions(contentId: string | undefined) {
 
 	// Live query — updates instantly when collaborators create/resolve discussions.
 	// Returns undefined data when the query function returns null/undefined (disabled).
-	const { data: liveRows } = useLiveQuery(
+	const { data: liveRows, isReady } = useLiveQuery(
 		(q) => (collection ? q.from({ discussions: collection }) : null),
 		[collection],
 	);
@@ -61,10 +61,9 @@ export function useEditorDiscussions(contentId: string | undefined) {
 	// The consumer (plate-editor.tsx) already casts `discussions as TDiscussion[]`
 	// so it handles both shapes at the cast boundary.
 	// biome-ignore lint/suspicious/noExplicitAny: hybrid Electric/oRPC shape union — consumer casts to TDiscussion[]
-	const discussions: any[] =
-		(liveRows ?? []).length > 0
-			? (liveRows as DiscussionRow[])
-			: (data?.discussions ?? []);
+	const discussions: any[] = isReady
+		? (liveRows as DiscussionRow[])
+		: (data?.discussions ?? []);
 
 	return {
 		discussions,
