@@ -7,9 +7,9 @@ export type ContentRow = {
 	team_id: string;
 	organization_id: string;
 	writer_id: string | null;
-	created_by_member_id: string | null;
+	created_by_member_id: string;
 	status: "draft" | "published" | "archived";
-	meta: Record<string, unknown> | null;
+	meta: Record<string, unknown>;
 	body: string | null;
 	created_at: string;
 	updated_at: string;

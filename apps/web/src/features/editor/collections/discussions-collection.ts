@@ -5,9 +5,9 @@ import { createCollection } from "@tanstack/react-db";
 export type DiscussionRow = {
 	id: string;
 	content_id: string;
-	block_id: string | null;
+	block_id: string;
 	user_id: string;
-	document_content: unknown;
+	document_content: string | null;
 	is_resolved: boolean;
 	is_ai: boolean;
 	created_at: string;
