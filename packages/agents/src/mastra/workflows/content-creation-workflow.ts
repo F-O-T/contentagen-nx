@@ -65,6 +65,8 @@ const writeStep = createStep({
 
 const revisionCycleStep = createStep({
    id: "revision-cycle",
+   // inputSchema matches writeStep output for type compatibility with .dowhile().
+   // The step reads current editor state via agent tools — inputData is not used.
    inputSchema: z.object({
       message: z.string(),
    }),

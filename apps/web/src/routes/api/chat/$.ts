@@ -88,6 +88,17 @@ export const Route = createFileRoute("/api/chat/$")({
 
             // If contextId present, always route to content-agent
             const effectiveRouter = contextId ? "content" : router;
+
+            function filterDataStreamParts() {
+               return new TransformStream({
+                  transform(chunk, controller) {
+                     const type = (chunk as { type?: string }).type;
+                     if (typeof type === "string" && type.startsWith("data-")) return;
+                     controller.enqueue(chunk);
+                  },
+               });
+            }
+
             const prefix = ROUTER_PREFIX_MAP[effectiveRouter] ?? "";
             const processedMessages = prefix
                ? messages.map((msg: ModelMessage, idx: number) => {
@@ -144,15 +155,7 @@ export const Route = createFileRoute("/api/chat/$")({
                   },
                });
 
-               const filteredWorkflowStream = workflowStream.pipeThrough(
-                  new TransformStream({
-                     transform(chunk, controller) {
-                        const type = (chunk as { type?: string }).type;
-                        if (typeof type === "string" && type.startsWith("data-")) return;
-                        controller.enqueue(chunk);
-                     },
-                  }),
-               );
+               const filteredWorkflowStream = workflowStream.pipeThrough(filterDataStreamParts());
 
                return createUIMessageStreamResponse({ stream: filteredWorkflowStream });
             }
@@ -181,17 +184,7 @@ export const Route = createFileRoute("/api/chat/$")({
             // data-tool-call-approval). @assistant-ui/react v0.12.x initialises the
             // `tools` scope in RuntimeAdapter but NOT `dataRenderers`, so any data
             // message part causes a "scope does not have dataRenderers" crash.
-            const filteredStream = stream.pipeThrough(
-               new TransformStream({
-                  transform(chunk, controller) {
-                     const type = (chunk as { type?: string }).type;
-                     if (typeof type === "string" && type.startsWith("data-")) {
-                        return;
-                     }
-                     controller.enqueue(chunk);
-                  },
-               }),
-            );
+            const filteredStream = stream.pipeThrough(filterDataStreamParts());
 
             return createUIMessageStreamResponse({ stream: filteredStream });
          },
