@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
+import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/",
@@ -111,6 +112,7 @@ function EmptyState({ slug, teamSlug }: { slug: string; teamSlug: string }) {
 // ---------------------------------------------------------------------------
 
 function InsightsListPage() {
+   useSidebarSection("insights");
    const navigate = useNavigate();
    const { slug, teamSlug } = Route.useParams();
    const queryClient = useQueryClient();

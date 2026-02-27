@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { DashboardView } from "@/features/analytics/ui/dashboard-view";
 import { orpc } from "@/integrations/orpc/client";
+import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/$dashboardId",
@@ -41,6 +42,7 @@ function DashboardViewPageContent() {
 }
 
 function DashboardViewPage() {
+   useSidebarSection("dashboards");
    return (
       <Suspense fallback={<DashboardSkeleton />}>
          <DashboardViewPageContent />
