@@ -28,6 +28,11 @@ services:
       - contentta_pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d contentta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -61,7 +66,9 @@ services:
     ports:
       - "3001:3000"
     depends_on:
-      - contentta-db
+      contentta-db:
+        condition: service_healthy
+    restart: on-failure
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/v1/health"]
       interval: 10s
