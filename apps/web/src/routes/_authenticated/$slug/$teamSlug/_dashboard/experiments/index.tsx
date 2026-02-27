@@ -1,9 +1,18 @@
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { createFileRoute } from "@tanstack/react-router";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { PageHeader } from "@/components/page-header";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { ExperimentsListSection } from "@/features/experiments/ui/experiments-list-section";
 
 export const Route = createFileRoute(
@@ -33,6 +42,29 @@ function ExperimentsPageSkeleton() {
 }
 
 function ExperimentsPageContent() {
+   const navigate = useNavigate();
+   const { slug, teamSlug } = Route.useParams();
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo experimento"
+               onClick={() =>
+                  navigate({
+                     to: "/$slug/$teamSlug/experiments/new",
+                     params: { slug, teamSlug },
+                  })
+               }
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
+   );
+
    return (
       <main className="flex flex-col gap-4">
          <PageHeader

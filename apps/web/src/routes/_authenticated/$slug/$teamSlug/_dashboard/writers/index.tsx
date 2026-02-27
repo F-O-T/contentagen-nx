@@ -1,6 +1,12 @@
 import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
+import {
    useMutation,
    useQueryClient,
    useSuspenseQuery,
@@ -19,6 +25,8 @@ import {
    WritersTable,
    WritersTableSkeleton,
 } from "@/features/writers/ui/writers-table";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -91,6 +99,32 @@ function WritersContent() {
             toast.error(error.message ?? "Erro ao excluir escritor");
          },
       }),
+   );
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo escritor"
+               onClick={() =>
+                  createMutation.mutate({
+                     personaConfig: {
+                        metadata: { name: "Novo escritor" },
+                        instructions: {
+                           ragIntegration: true,
+                           enableInternalLinking: true,
+                           enableFactChecking: false,
+                        },
+                     },
+                  })
+               }
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    function handleEditWriter(writer: WriterRow) {
