@@ -14,7 +14,7 @@ import {
    ContextPanelMeta,
 } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
-import { AlertCircle, Copy, RefreshCw, Trash2 } from "lucide-react";
+import { AlertCircle, Clock, Copy, RefreshCw, Tag, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -191,10 +191,12 @@ function EditInsightPage() {
             </ContextPanelHeader>
             <ContextPanelContent>
                <ContextPanelMeta
+                  icon={Tag}
                   label="Tipo"
                   value={TYPE_LABELS[insight.type] ?? insight.type}
                />
                <ContextPanelMeta
+                  icon={Clock}
                   label="Calculado"
                   value={
                      insight.lastComputedAt

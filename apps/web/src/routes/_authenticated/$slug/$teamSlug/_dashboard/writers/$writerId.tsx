@@ -7,7 +7,7 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, Trash2 } from "lucide-react";
+import { AlertCircle, FileText, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -124,7 +124,7 @@ function EditWriterPage() {
                <ContextPanelTitle>{writer.personaConfig.metadata.name}</ContextPanelTitle>
             </ContextPanelHeader>
             <ContextPanelContent>
-               <ContextPanelMeta label="Conteúdos" value={writer.contentCount ?? 0} />
+               <ContextPanelMeta icon={FileText} label="Conteúdos" value={writer.contentCount ?? 0} />
                <ContextPanelDivider />
                <ContextPanelAction
                   icon={Trash2}

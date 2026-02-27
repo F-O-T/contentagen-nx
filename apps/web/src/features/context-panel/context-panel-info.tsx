@@ -1,4 +1,13 @@
-import { cn } from "@packages/ui/lib/utils";
+import { Button, buttonVariants } from "@packages/ui/components/button";
+import {
+   Item,
+   ItemActions,
+   ItemContent,
+   ItemMedia,
+   ItemSeparator,
+   ItemTitle,
+} from "@packages/ui/components/item";
+import { type VariantProps } from "class-variance-authority";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -6,49 +15,51 @@ export function ContextPanelAction({
    icon: Icon,
    label,
    onClick,
-   variant = "default",
+   variant = "ghost",
 }: {
    icon: LucideIcon;
    label: string;
    onClick: () => void;
-   variant?: "default" | "destructive";
+   variant?: VariantProps<typeof buttonVariants>["variant"];
 }) {
    return (
-      <button
-         className={cn(
-            "flex w-full items-center gap-2.5 px-3 py-1.5 text-sm transition-colors hover:bg-accent",
-            variant === "destructive" &&
-               "text-destructive hover:bg-destructive/10 hover:text-destructive",
-         )}
+      <Button
+         className="w-full justify-start"
          onClick={onClick}
+         size="sm"
          type="button"
+         variant={variant}
       >
-         <Icon
-            className={cn(
-               "size-4 shrink-0 text-muted-foreground",
-               variant === "destructive" && "text-destructive",
-            )}
-         />
+         <Icon className="size-4 shrink-0" />
          {label}
-      </button>
+      </Button>
    );
 }
 
 export function ContextPanelMeta({
+   icon: Icon,
    label,
    value,
 }: {
+   icon: LucideIcon;
    label: string;
    value: ReactNode;
 }) {
    return (
-      <div className="flex items-center justify-between px-3 py-1.5 text-sm">
-         <span className="text-muted-foreground">{label}</span>
-         <span className="ml-4 truncate font-medium">{value}</span>
-      </div>
+      <Item className="px-0" size="sm">
+         <ItemMedia variant="icon">
+            <Icon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>{label}</ItemTitle>
+         </ItemContent>
+         <ItemActions>
+            <span className="text-sm text-muted-foreground">{value}</span>
+         </ItemActions>
+      </Item>
    );
 }
 
 export function ContextPanelDivider() {
-   return <div className="my-1 border-t" />;
+   return <ItemSeparator className="mx-2 my-1" />;
 }

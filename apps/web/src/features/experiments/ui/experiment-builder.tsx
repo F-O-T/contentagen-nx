@@ -10,7 +10,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { CheckCheck, Pause, Play, Trash2 } from "lucide-react";
+import { Activity, CheckCheck, GitBranch, Pause, Play, Tag, Target, Trash2 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
@@ -188,18 +188,21 @@ function ExperimentBuilderEditContent({
          </ContextPanelHeader>
          <ContextPanelContent>
             <ContextPanelMeta
+               icon={Activity}
                label="Status"
                value={STATUS_LABELS[experiment.status] ?? experiment.status}
             />
             <ContextPanelMeta
+               icon={Tag}
                label="Tipo"
                value={TARGET_TYPE_LABELS[experiment.targetType] ?? experiment.targetType}
             />
             <ContextPanelMeta
+               icon={Target}
                label="Meta"
                value={GOAL_LABELS[experiment.goal] ?? experiment.goal}
             />
-            <ContextPanelMeta label="Variantes" value={variantCount} />
+            <ContextPanelMeta icon={GitBranch} label="Variantes" value={variantCount} />
             <ContextPanelDivider />
             {canStart && (
                <ContextPanelAction

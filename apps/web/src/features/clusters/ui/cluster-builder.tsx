@@ -17,9 +17,12 @@ import {
 } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
+   Activity,
    BookOpen,
    ExternalLink,
+   Layers,
    Loader2,
+   Network,
    Plus,
    Sparkles,
    Trash2,
@@ -522,14 +525,17 @@ function ClusterBuilderEdit({ clusterId }: ClusterBuilderEditProps) {
          </ContextPanelHeader>
          <ContextPanelContent>
             <ContextPanelMeta
+               icon={Layers}
                label="Modo"
                value={MODE_LABELS[mode] ?? mode}
             />
             <ContextPanelMeta
+               icon={Activity}
                label="Status"
                value={STATUS_LABELS[cluster.status] ?? cluster.status}
             />
             <ContextPanelMeta
+               icon={Network}
                label="Satélites"
                value={satellites.length}
             />

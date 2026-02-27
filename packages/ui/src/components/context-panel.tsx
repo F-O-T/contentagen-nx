@@ -4,7 +4,10 @@ import type React from "react";
 function ContextPanel({ className, ...props }: React.ComponentProps<"div">) {
    return (
       <div
-         className={cn("flex h-full min-h-0 flex-col", className)}
+         className={cn(
+            "px-2 pt-4 flex gap-4 h-full min-h-0 flex-col",
+            className,
+         )}
          data-slot="context-panel"
          {...props}
       />
@@ -18,7 +21,7 @@ function ContextPanelHeader({
    return (
       <div
          className={cn(
-            "flex shrink-0 bg-background items-center gap-2 rounded-xl px-2 py-2 mx-2 my-4",
+            "flex shrink-0 bg-background items-center gap-2 rounded-xl p-2  ",
             className,
          )}
          data-slot="context-panel-header"
@@ -59,7 +62,10 @@ function ContextPanelContent({
 }: React.ComponentProps<"div">) {
    return (
       <div
-         className={cn("flex min-h-0 flex-1 flex-col overflow-auto", className)}
+         className={cn(
+            "flex gap-4 min-h-0 flex-1 flex-col overflow-auto",
+            className,
+         )}
          data-slot="context-panel-content"
          {...props}
       />

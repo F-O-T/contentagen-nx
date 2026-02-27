@@ -4,9 +4,12 @@ import type { ContentMeta } from "@packages/database/schemas/content";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
 import { useCallback, useRef, useState } from "react";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import { EditorMetaPanel } from "./editor-meta-panel";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
 import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
+
 
 type ContentStatus = "draft" | "published" | "archived";
 
@@ -62,14 +65,22 @@ export function EditorPage({ contentId }: EditorPageProps) {
       [contentId, publishMutation, archiveMutation, moveToDraftMutation],
    );
 
+   const handleMetaSave = useCallback(
+      async (values: ContentMeta) => {
+         setMeta(values);
+         await updateMutation.mutateAsync({
+            id: contentId,
+            data: { meta: values, body: JSON.stringify(editorValueRef.current) },
+         });
+      },
+      [contentId, updateMutation],
+   );
+
+   useContextPanelInfo(<EditorMetaPanel meta={meta} onSave={handleMetaSave} />);
+
    return (
       <div className="flex h-full flex-col">
-         <EditorContextPanelTabs
-            contentId={contentId}
-            meta={meta}
-            onChange={setMeta}
-            readOnly={content.status === "archived"}
-         />
+         <EditorContextPanelTabs contentId={contentId} />
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
