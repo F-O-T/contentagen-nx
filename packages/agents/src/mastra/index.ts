@@ -22,6 +22,7 @@ export type { RequestContext };
 export type CustomRequestContext = {
    userId: string;
    writerId?: string;
+   contentId?: string;
    model?: ModelId;
    language?: string;
    writerInstructions?: InstructionMemoryItem[];
@@ -31,6 +32,7 @@ export type CustomRequestContext = {
    maxTokens?: number;
    frequencyPenalty?: number;
    presencePenalty?: number;
+   onBodyUpdate?: (toolName: string, output: Record<string, unknown>) => Promise<void>;
 };
 
 const mastraStorage = new PostgresStore({
@@ -84,6 +86,9 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.writerId) {
       requestContext.set("writerId", context.writerId);
    }
+   if (context.contentId) {
+      requestContext.set("contentId", context.contentId);
+   }
    if (context.model) {
       requestContext.set("model", context.model);
    }
@@ -107,6 +112,9 @@ export function createRequestContext(context: CustomRequestContext) {
    }
    if (context.writerInstructions) {
       requestContext.set("writerInstructions", context.writerInstructions);
+   }
+   if (context.onBodyUpdate) {
+      requestContext.set("onBodyUpdate", context.onBodyUpdate);
    }
    return requestContext;
 }
