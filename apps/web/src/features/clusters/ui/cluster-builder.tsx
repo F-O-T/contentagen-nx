@@ -22,10 +22,23 @@ import {
    Loader2,
    Plus,
    Sparkles,
+   Trash2,
    X,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
+import {
+   ContextPanelAction,
+   ContextPanelDivider,
+   ContextPanelMeta,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
@@ -350,6 +363,17 @@ function SatellitesTab({
 
 // ─── Cluster Builder (Edit Mode) ─────────────────────────────────────────────
 
+const MODE_LABELS: Record<string, string> = {
+   seo: "SEO",
+   changelog: "Changelog",
+   series: "Série",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+   draft: "Rascunho",
+   published: "Publicado",
+};
+
 interface ClusterBuilderEditProps {
    clusterId: string;
 }
@@ -489,6 +513,35 @@ function ClusterBuilderEdit({ clusterId }: ClusterBuilderEditProps) {
          setMode(data.mode);
       },
       [],
+   );
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>{pillarTitle || cluster.meta.title}</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelMeta
+               label="Modo"
+               value={MODE_LABELS[mode] ?? mode}
+            />
+            <ContextPanelMeta
+               label="Status"
+               value={STATUS_LABELS[cluster.status] ?? cluster.status}
+            />
+            <ContextPanelMeta
+               label="Satélites"
+               value={satellites.length}
+            />
+            <ContextPanelDivider />
+            <ContextPanelAction
+               icon={Trash2}
+               label="Deletar cluster"
+               onClick={handleDelete}
+               variant="destructive"
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    return (
