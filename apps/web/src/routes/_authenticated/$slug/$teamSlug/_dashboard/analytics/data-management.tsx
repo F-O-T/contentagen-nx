@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 import { DataManagementLayout } from "@/layout/dashboard/ui/data-management-layout";
 
 export const Route = createFileRoute(
@@ -8,6 +9,7 @@ export const Route = createFileRoute(
 });
 
 function DataManagementLayoutRoute() {
+   useSidebarSection("data-management");
    return (
       <DataManagementLayout>
          <Outlet />

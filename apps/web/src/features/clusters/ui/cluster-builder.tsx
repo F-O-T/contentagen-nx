@@ -1,6 +1,12 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Label } from "@packages/ui/components/label";
 import { Separator } from "@packages/ui/components/separator";
 import {
@@ -17,15 +23,25 @@ import {
 } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
+   Activity,
    BookOpen,
    ExternalLink,
+   Layers,
    Loader2,
+   Network,
    Plus,
    Sparkles,
+   Trash2,
    X,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import {
+   ContextPanelAction,
+   ContextPanelDivider,
+   ContextPanelMeta,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
@@ -350,6 +366,17 @@ function SatellitesTab({
 
 // ─── Cluster Builder (Edit Mode) ─────────────────────────────────────────────
 
+const MODE_LABELS: Record<string, string> = {
+   seo: "SEO",
+   changelog: "Changelog",
+   series: "Série",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+   draft: "Rascunho",
+   published: "Publicado",
+};
+
 interface ClusterBuilderEditProps {
    clusterId: string;
 }
@@ -489,6 +516,40 @@ function ClusterBuilderEdit({ clusterId }: ClusterBuilderEditProps) {
          setMode(data.mode);
       },
       [],
+   );
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>
+               {pillarTitle || cluster.meta.title}
+            </ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelMeta
+               icon={Layers}
+               label="Modo"
+               value={MODE_LABELS[mode] ?? mode}
+            />
+            <ContextPanelMeta
+               icon={Activity}
+               label="Status"
+               value={STATUS_LABELS[cluster.status] ?? cluster.status}
+            />
+            <ContextPanelMeta
+               icon={Network}
+               label="Satélites"
+               value={satellites.length}
+            />
+            <ContextPanelDivider />
+            <ContextPanelAction
+               icon={Trash2}
+               label="Deletar cluster"
+               onClick={handleDelete}
+               variant="destructive"
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    return (

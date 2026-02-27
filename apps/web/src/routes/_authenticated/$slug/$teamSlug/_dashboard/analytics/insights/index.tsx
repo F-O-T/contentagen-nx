@@ -1,5 +1,11 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    Table,
@@ -23,8 +29,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
+import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/",
@@ -111,10 +120,31 @@ function EmptyState({ slug, teamSlug }: { slug: string; teamSlug: string }) {
 // ---------------------------------------------------------------------------
 
 function InsightsListPage() {
+   useSidebarSection("insights");
    const navigate = useNavigate();
    const { slug, teamSlug } = Route.useParams();
    const queryClient = useQueryClient();
    const { openAlertDialog } = useAlertDialog();
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo insight"
+               onClick={() =>
+                  navigate({
+                     to: "/$slug/$teamSlug/analytics/insights/new",
+                     params: { slug, teamSlug },
+                  })
+               }
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
+   );
 
    const {
       data: insights,

@@ -100,6 +100,7 @@ function ContextPickerInner({
             <div className="flex items-center gap-2 border-b px-3 py-2">
                <span className="text-muted-foreground">
                   <svg
+                     aria-hidden="true"
                      className="size-4"
                      fill="none"
                      stroke="currentColor"
@@ -111,6 +112,7 @@ function ContextPickerInner({
                   </svg>
                </span>
                <input
+                  // biome-ignore lint/a11y/noAutofocus: search input in popover should autofocus for UX
                   autoFocus
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                   onChange={(e) => setSearch(e.target.value)}

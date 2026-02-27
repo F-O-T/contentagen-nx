@@ -1,4 +1,10 @@
 import { Button } from "@packages/ui/components/button";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -6,10 +12,7 @@ import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { PageHeader } from "@/components/page-header";
-import {
-   ContextPanelAction,
-   ContextPanelSection,
-} from "@/features/context-panel/context-panel-info";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
@@ -44,18 +47,23 @@ function FormsPage() {
    const navigate = useNavigate();
 
    useContextPanelInfo(
-      <ContextPanelSection title="Ações">
-         <ContextPanelAction
-            icon={Plus}
-            label="Novo formulário"
-            onClick={() =>
-               navigate({
-                  to: "/$slug/$teamSlug/forms/$formId",
-                  params: { slug, teamSlug, formId: "new" },
-               })
-            }
-         />
-      </ContextPanelSection>,
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo formulário"
+               onClick={() =>
+                  navigate({
+                     to: "/$slug/$teamSlug/forms/$formId",
+                     params: { slug, teamSlug, formId: "new" },
+                  })
+               }
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    return (

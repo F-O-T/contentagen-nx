@@ -60,6 +60,7 @@ function TecoChatTabInner({
    return (
       <div className="h-full [&_.aui-user-message-content]:bg-background [&_.aui-user-message-content]:text-foreground">
          <Thread
+            onModeChange={onModeChange}
             quickSuggestions={QUICK_SUGGESTIONS}
             recentThreadsSlot={
                <Suspense fallback={null}>
@@ -69,7 +70,6 @@ function TecoChatTabInner({
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
             welcomeTitle="Como posso te ajudar?"
-            onModeChange={onModeChange}
          />
       </div>
    );
@@ -84,7 +84,7 @@ export function TecoChatTab() {
 
    return (
       <AssistantRuntimeProvider runtime={runtime}>
-         <TecoChatTabInner teamId={activeTeamId} onModeChange={setMode} />
+         <TecoChatTabInner onModeChange={setMode} teamId={activeTeamId} />
       </AssistantRuntimeProvider>
    );
 }

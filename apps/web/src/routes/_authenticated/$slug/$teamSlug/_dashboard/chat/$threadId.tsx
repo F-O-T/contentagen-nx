@@ -71,11 +71,11 @@ function ChatThreadPage() {
    return (
       <AssistantRuntimeProvider runtime={runtime}>
          <Thread
+            onModeChange={setMode}
             quickSuggestions={QUICK_SUGGESTIONS}
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
             welcomeTitle="Como posso te ajudar?"
-            onModeChange={setMode}
          />
       </AssistantRuntimeProvider>
    );

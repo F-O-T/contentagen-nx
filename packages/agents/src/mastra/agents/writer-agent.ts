@@ -3,55 +3,57 @@ import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
-	buildLanguageInstruction,
-	compileInstructionMemories,
+   buildLanguageInstruction,
+   compileInstructionMemories,
 } from "../../utils";
-import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
-import { graphSearchTool } from "../tools/rag/graph-search-tool";
-import { searchPreviousContentTool } from "../tools/rag/search-previous-content-tool";
-import { webSearchTool } from "../tools/research/web-search-tool";
-import { serpAnalysisTool } from "../tools/research/serp-analysis-tool";
-import { factFinderTool } from "../tools/research/fact-finder-tool";
-import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
+import { dateTool } from "../tools/date-tool";
+import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
+import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
+import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
+import { deleteTextTool } from "../tools/editor/delete-text-tool";
+import { formatTextTool } from "../tools/editor/format-text-tool";
+import { generateQuickAnswerTool } from "../tools/editor/generate-quick-answer-tool";
+import { improveReadabilityTool } from "../tools/editor/improve-readability-tool";
+import { injectKeywordsTool } from "../tools/editor/inject-keywords-tool";
+import { insertCodeBlockTool } from "../tools/editor/insert-code-block-tool";
+import { insertHeadingTool } from "../tools/editor/insert-heading-tool";
+import { insertImageTool } from "../tools/editor/insert-image-tool";
+import { insertListTool } from "../tools/editor/insert-list-tool";
+import { insertTableTool } from "../tools/editor/insert-table-tool";
+import { insertTextTool } from "../tools/editor/insert-text-tool";
+import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
+import { replaceTextTool } from "../tools/editor/replace-text-tool";
+import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
 import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
 import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
 import { editSlugTool } from "../tools/frontmatter/edit-slug-tool";
-import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
-import { insertTextTool } from "../tools/editor/insert-text-tool";
-import { replaceTextTool } from "../tools/editor/replace-text-tool";
-import { deleteTextTool } from "../tools/editor/delete-text-tool";
-import { formatTextTool } from "../tools/editor/format-text-tool";
-import { insertHeadingTool } from "../tools/editor/insert-heading-tool";
-import { insertListTool } from "../tools/editor/insert-list-tool";
-import { insertCodeBlockTool } from "../tools/editor/insert-code-block-tool";
-import { insertTableTool } from "../tools/editor/insert-table-tool";
-import { insertImageTool } from "../tools/editor/insert-image-tool";
-import { injectKeywordsTool } from "../tools/editor/inject-keywords-tool";
-import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
-import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
-import { improveReadabilityTool } from "../tools/editor/improve-readability-tool";
-import { generateQuickAnswerTool } from "../tools/editor/generate-quick-answer-tool";
-import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
-import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
-import { dateTool } from "../tools/date-tool";
+import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
+import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
+import { graphSearchTool } from "../tools/rag/graph-search-tool";
+import { searchPreviousContentTool } from "../tools/rag/search-previous-content-tool";
+import { factFinderTool } from "../tools/research/fact-finder-tool";
+import { serpAnalysisTool } from "../tools/research/serp-analysis-tool";
+import { webSearchTool } from "../tools/research/web-search-tool";
 
 const memory = new Memory({
-	options: {
-		lastMessages: 30,
-		generateTitle: {
-			model: "openrouter/google/gemini-2.5-flash-lite",
-		},
-	},
+   options: {
+      lastMessages: 30,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
 });
 
 const getInstructions = (
-	language: string,
-	writerInstructions?: InstructionMemoryItem[],
+   language: string,
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-	const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
-	const languageInstruction = buildLanguageInstruction(language);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
+   const languageInstruction = buildLanguageInstruction(language);
 
-	return `
+   return `
 ${languageInstruction}
 
 ${compiledMemories}
@@ -116,56 +118,56 @@ Respond in the same language as the user request.
 };
 
 export const writerAgent: Agent = new Agent({
-	id: "writer-agent",
-	name: "Writer & Editor Agent",
-	description:
-		"Specialized in writing complete articles, editing content, formatting, inserting elements (headings, lists, tables, code blocks), and applying structured text edits. Use this agent for: writing full articles, editing existing content, reformatting, inserting new sections, applying inline edits.",
+   id: "writer-agent",
+   name: "Writer & Editor Agent",
+   description:
+      "Specialized in writing complete articles, editing content, formatting, inserting elements (headings, lists, tables, code blocks), and applying structured text edits. Use this agent for: writing full articles, editing existing content, reformatting, inserting new sections, applying inline edits.",
 
-	model: ({ requestContext }) => {
-		const maybeModel = requestContext?.get("model");
-		return typeof maybeModel === "string" && maybeModel.length > 0
-			? maybeModel
-			: DEFAULT_CONTENT_MODEL_ID;
-	},
+   model: ({ requestContext }) => {
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
+   },
 
-	instructions: ({ requestContext }) => {
-		const writerInstructions = requestContext?.get("writerInstructions") as
-			| InstructionMemoryItem[]
-			| undefined;
-		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getInstructions(language, writerInstructions);
-	},
+   instructions: ({ requestContext }) => {
+      const writerInstructions = requestContext?.get("writerInstructions") as
+         | InstructionMemoryItem[]
+         | undefined;
+      const language = (requestContext?.get("language") as string) ?? "pt-BR";
+      return getInstructions(language, writerInstructions);
+   },
 
-	memory,
+   memory,
 
-	tools: {
-		getInstructionMemories: getInstructionsTool,
-		searchPreviousContent: searchPreviousContentTool,
-		graphSearch: graphSearchTool,
-		webSearch: webSearchTool,
-		serpAnalysis: serpAnalysisTool,
-		factFinder: factFinderTool,
-		editTitle: editTitleTool,
-		editDescription: editDescriptionTool,
-		editKeywords: editKeywordsTool,
-		editSlug: editSlugTool,
-		addEditorComment: addEditorCommentTool,
-		insertText: insertTextTool,
-		proposeSuggestion: proposeSuggestionTool,
-		replaceText: replaceTextTool,
-		deleteText: deleteTextTool,
-		formatText: formatTextTool,
-		insertHeading: insertHeadingTool,
-		insertList: insertListTool,
-		insertCodeBlock: insertCodeBlockTool,
-		insertTable: insertTableTool,
-		insertImage: insertImageTool,
-		injectKeywords: injectKeywordsTool,
-		addInternalLinks: addInternalLinksTool,
-		addExternalLinks: addExternalLinksTool,
-		improveReadability: improveReadabilityTool,
-		generateQuickAnswer: generateQuickAnswerTool,
-		suggestImages: suggestImagesTool,
-		dateTool: dateTool,
-	},
+   tools: {
+      getInstructionMemories: getInstructionsTool,
+      searchPreviousContent: searchPreviousContentTool,
+      graphSearch: graphSearchTool,
+      webSearch: webSearchTool,
+      serpAnalysis: serpAnalysisTool,
+      factFinder: factFinderTool,
+      editTitle: editTitleTool,
+      editDescription: editDescriptionTool,
+      editKeywords: editKeywordsTool,
+      editSlug: editSlugTool,
+      addEditorComment: addEditorCommentTool,
+      insertText: insertTextTool,
+      proposeSuggestion: proposeSuggestionTool,
+      replaceText: replaceTextTool,
+      deleteText: deleteTextTool,
+      formatText: formatTextTool,
+      insertHeading: insertHeadingTool,
+      insertList: insertListTool,
+      insertCodeBlock: insertCodeBlockTool,
+      insertTable: insertTableTool,
+      insertImage: insertImageTool,
+      injectKeywords: injectKeywordsTool,
+      addInternalLinks: addInternalLinksTool,
+      addExternalLinks: addExternalLinksTool,
+      improveReadability: improveReadabilityTool,
+      generateQuickAnswer: generateQuickAnswerTool,
+      suggestImages: suggestImagesTool,
+      dateTool: dateTool,
+   },
 });

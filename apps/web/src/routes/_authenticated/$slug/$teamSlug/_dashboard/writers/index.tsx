@@ -1,4 +1,10 @@
 import { Button } from "@packages/ui/components/button";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import {
    useMutation,
@@ -14,6 +20,8 @@ import { Loader2, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import {
    type WriterRow,
    WritersTable,
@@ -91,6 +99,32 @@ function WritersContent() {
             toast.error(error.message ?? "Erro ao excluir escritor");
          },
       }),
+   );
+
+   useContextPanelInfo(
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo escritor"
+               onClick={() =>
+                  createMutation.mutate({
+                     personaConfig: {
+                        metadata: { name: "Novo escritor" },
+                        instructions: {
+                           ragIntegration: true,
+                           enableInternalLinking: true,
+                           enableFactChecking: false,
+                        },
+                     },
+                  })
+               }
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    function handleEditWriter(writer: WriterRow) {

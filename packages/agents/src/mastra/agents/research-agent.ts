@@ -3,43 +3,45 @@ import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
-	buildLanguageInstruction,
-	compileInstructionMemories,
+   buildLanguageInstruction,
+   compileInstructionMemories,
 } from "../../utils";
-import { contentGapTool } from "../tools/research/content-gap-tool";
+import { dateTool } from "../tools/date-tool";
+import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
+import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
+import { editSlugTool } from "../tools/frontmatter/edit-slug-tool";
+import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
+import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
+import { graphSearchTool } from "../tools/rag/graph-search-tool";
+import { searchPreviousContentTool } from "../tools/rag/search-previous-content-tool";
 import { competitorContentTool } from "../tools/research/competitor-content-tool";
+import { contentGapTool } from "../tools/research/content-gap-tool";
 import { factFinderTool } from "../tools/research/fact-finder-tool";
 import { relatedKeywordsTool } from "../tools/research/related-keywords-tool";
 import { researchCompletenessTool } from "../tools/research/research-completeness-tool";
 import { serpAnalysisTool } from "../tools/research/serp-analysis-tool";
 import { webCrawlTool } from "../tools/research/web-crawl-tool";
 import { webSearchTool } from "../tools/research/web-search-tool";
-import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
-import { graphSearchTool } from "../tools/rag/graph-search-tool";
-import { searchPreviousContentTool } from "../tools/rag/search-previous-content-tool";
-import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
-import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
-import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
-import { editSlugTool } from "../tools/frontmatter/edit-slug-tool";
-import { dateTool } from "../tools/date-tool";
 
 const memory = new Memory({
-	options: {
-		lastMessages: 20,
-		generateTitle: {
-			model: "openrouter/google/gemini-2.5-flash-lite",
-		},
-	},
+   options: {
+      lastMessages: 20,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
 });
 
 const getInstructions = (
-	language: string,
-	writerInstructions?: InstructionMemoryItem[],
+   language: string,
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-	const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
-	const languageInstruction = buildLanguageInstruction(language);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
+   const languageInstruction = buildLanguageInstruction(language);
 
-	return `
+   return `
 ${languageInstruction}
 
 ${compiledMemories}
@@ -103,44 +105,44 @@ Respond in the same language as the user request.
 };
 
 export const researchAgent: Agent = new Agent({
-	id: "research-agent",
-	name: "Research & Planning Agent",
-	description:
-		"Specialized in content research, SERP analysis, competitor analysis, keyword research, content gaps, and content planning. Use this agent for: researching topics, planning content structure, analyzing competitors, finding keyword opportunities, and building research briefings.",
+   id: "research-agent",
+   name: "Research & Planning Agent",
+   description:
+      "Specialized in content research, SERP analysis, competitor analysis, keyword research, content gaps, and content planning. Use this agent for: researching topics, planning content structure, analyzing competitors, finding keyword opportunities, and building research briefings.",
 
-	model: ({ requestContext }) => {
-		const maybeModel = requestContext?.get("model");
-		return typeof maybeModel === "string" && maybeModel.length > 0
-			? maybeModel
-			: DEFAULT_CONTENT_MODEL_ID;
-	},
+   model: ({ requestContext }) => {
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
+   },
 
-	instructions: ({ requestContext }) => {
-		const writerInstructions = requestContext?.get("writerInstructions") as
-			| InstructionMemoryItem[]
-			| undefined;
-		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getInstructions(language, writerInstructions);
-	},
+   instructions: ({ requestContext }) => {
+      const writerInstructions = requestContext?.get("writerInstructions") as
+         | InstructionMemoryItem[]
+         | undefined;
+      const language = (requestContext?.get("language") as string) ?? "pt-BR";
+      return getInstructions(language, writerInstructions);
+   },
 
-	memory,
+   memory,
 
-	tools: {
-		getInstructionMemories: getInstructionsTool,
-		searchPreviousContent: searchPreviousContentTool,
-		graphSearch: graphSearchTool,
-		webSearch: webSearchTool,
-		serpAnalysis: serpAnalysisTool,
-		contentGap: contentGapTool,
-		competitorContent: competitorContentTool,
-		relatedKeywords: relatedKeywordsTool,
-		factFinder: factFinderTool,
-		webCrawl: webCrawlTool,
-		researchCompleteness: researchCompletenessTool,
-		editTitle: editTitleTool,
-		editDescription: editDescriptionTool,
-		editKeywords: editKeywordsTool,
-		editSlug: editSlugTool,
-		dateTool: dateTool,
-	},
+   tools: {
+      getInstructionMemories: getInstructionsTool,
+      searchPreviousContent: searchPreviousContentTool,
+      graphSearch: graphSearchTool,
+      webSearch: webSearchTool,
+      serpAnalysis: serpAnalysisTool,
+      contentGap: contentGapTool,
+      competitorContent: competitorContentTool,
+      relatedKeywords: relatedKeywordsTool,
+      factFinder: factFinderTool,
+      webCrawl: webCrawlTool,
+      researchCompleteness: researchCompletenessTool,
+      editTitle: editTitleTool,
+      editDescription: editDescriptionTool,
+      editKeywords: editKeywordsTool,
+      editSlug: editSlugTool,
+      dateTool: dateTool,
+   },
 });

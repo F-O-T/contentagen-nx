@@ -4,31 +4,33 @@ import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
-	buildLanguageInstruction,
-	compileInstructionMemories,
+   buildLanguageInstruction,
+   compileInstructionMemories,
 } from "../../utils";
 import { researchAgent } from "./research-agent";
-import { writerAgent } from "./writer-agent";
-import { seoAuditorAgent } from "./seo-auditor-agent";
 import { reviewerAgent } from "./reviewer-agent";
+import { seoAuditorAgent } from "./seo-auditor-agent";
+import { writerAgent } from "./writer-agent";
 
 const memory = new Memory({
-	options: {
-		lastMessages: 30,
-		generateTitle: {
-			model: "openrouter/google/gemini-2.5-flash-lite",
-		},
-	},
+   options: {
+      lastMessages: 30,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
 });
 
 const getRouterInstructions = (
-	language: string,
-	writerInstructions?: InstructionMemoryItem[],
+   language: string,
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-	const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
-	const languageInstruction = buildLanguageInstruction(language);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
+   const languageInstruction = buildLanguageInstruction(language);
 
-	return `
+   return `
 ${languageInstruction}
 
 ${compiledMemories}
@@ -108,36 +110,36 @@ Respond in the same language as the user request.
  * sub-agents available to the router, which delegates via the network loop.
  */
 export const contentNetworkAgent: Agent = new Agent({
-	id: "content-network-agent",
-	name: "Content Network Agent",
-	description:
-		"Orchestration agent that routes content tasks to specialized agents for research, writing, SEO auditing, and review.",
+   id: "content-network-agent",
+   name: "Content Network Agent",
+   description:
+      "Orchestration agent that routes content tasks to specialized agents for research, writing, SEO auditing, and review.",
 
-	model: ({ requestContext }) => {
-		const maybeModel = requestContext?.get("model");
-		return typeof maybeModel === "string" && maybeModel.length > 0
-			? maybeModel
-			: DEFAULT_CONTENT_MODEL_ID;
-	},
+   model: ({ requestContext }) => {
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
+   },
 
-	instructions: ({ requestContext }) => {
-		const writerInstructions = requestContext?.get("writerInstructions") as
-			| InstructionMemoryItem[]
-			| undefined;
-		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getRouterInstructions(language, writerInstructions);
-	},
+   instructions: ({ requestContext }) => {
+      const writerInstructions = requestContext?.get("writerInstructions") as
+         | InstructionMemoryItem[]
+         | undefined;
+      const language = (requestContext?.get("language") as string) ?? "pt-BR";
+      return getRouterInstructions(language, writerInstructions);
+   },
 
-	memory,
+   memory,
 
-	// Sub-agents available for network delegation
-	agents: {
-		"research-agent": researchAgent,
-		"writer-agent": writerAgent,
-		"seo-auditor-agent": seoAuditorAgent,
-		"reviewer-agent": reviewerAgent,
-	},
+   // Sub-agents available for network delegation
+   agents: {
+      "research-agent": researchAgent,
+      "writer-agent": writerAgent,
+      "seo-auditor-agent": seoAuditorAgent,
+      "reviewer-agent": reviewerAgent,
+   },
 
-	// Router has no direct tools — specialists handle tool usage
-	tools: {},
+   // Router has no direct tools — specialists handle tool usage
+   tools: {},
 });

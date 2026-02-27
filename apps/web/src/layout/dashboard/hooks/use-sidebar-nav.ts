@@ -1,4 +1,5 @@
 import { Store, useStore } from "@tanstack/react-store";
+import { useEffect } from "react";
 
 export type SubSidebarSection = "dashboards" | "insights" | "data-management";
 
@@ -24,11 +25,13 @@ function savePinnedItems(items: string[]) {
 
 interface SidebarNavState {
    activeSection: SubSidebarSection | null;
+   searchQuery: string;
    pinnedItems: string[];
 }
 
 const initialState: SidebarNavState = {
    activeSection: null,
+   searchQuery: "",
    pinnedItems: loadPinnedItems(),
 };
 
@@ -38,6 +41,14 @@ export function setActiveSection(section: SubSidebarSection | null) {
    sidebarNavStore.setState((state) => ({
       ...state,
       activeSection: section,
+      searchQuery: "",
+   }));
+}
+
+export function setSearchQuery(query: string) {
+   sidebarNavStore.setState((state) => ({
+      ...state,
+      searchQuery: query,
    }));
 }
 
@@ -56,6 +67,23 @@ export function useSidebarNav() {
 
    return {
       activeSection: state.activeSection,
+      searchQuery: state.searchQuery,
       pinnedItems: state.pinnedItems,
+      setSearchQuery,
    };
+}
+
+export function useSidebarSection(section: SubSidebarSection) {
+   useEffect(() => {
+      setActiveSection(section);
+      return () => {
+         sidebarNavStore.setState((state) => ({
+            ...state,
+            activeSection:
+               state.activeSection === section ? null : state.activeSection,
+            searchQuery:
+               state.activeSection === section ? "" : state.searchQuery,
+         }));
+      };
+   }, [section]);
 }

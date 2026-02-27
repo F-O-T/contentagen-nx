@@ -1,9 +1,21 @@
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, FileText, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+   ContextPanelAction,
+   ContextPanelDivider,
+   ContextPanelMeta,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { WriterBuilder } from "@/features/writers/ui/writer-builder";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
@@ -104,6 +116,32 @@ function EditWriterPage() {
          onAction: () => deleteMutation.mutate({ id: writerId }),
       });
    }, [writerId, name, deleteMutation, openAlertDialog]);
+
+   useContextPanelInfo(
+      writer ? (
+         <ContextPanel>
+            <ContextPanelHeader>
+               <ContextPanelTitle>
+                  {writer.personaConfig.metadata.name}
+               </ContextPanelTitle>
+            </ContextPanelHeader>
+            <ContextPanelContent>
+               <ContextPanelMeta
+                  icon={FileText}
+                  label="Conteúdos"
+                  value={writer.contentCount ?? 0}
+               />
+               <ContextPanelDivider />
+               <ContextPanelAction
+                  icon={Trash2}
+                  label="Excluir escritor"
+                  onClick={handleDelete}
+                  variant="destructive"
+               />
+            </ContextPanelContent>
+         </ContextPanel>
+      ) : null,
+   );
 
    if (isLoading) {
       return (

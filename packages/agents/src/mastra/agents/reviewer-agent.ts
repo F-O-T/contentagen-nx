@@ -3,8 +3,8 @@ import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
-	buildLanguageInstruction,
-	compileInstructionMemories,
+   buildLanguageInstruction,
+   compileInstructionMemories,
 } from "../../utils";
 import { badPatternTool } from "../tools/analysis/bad-pattern-tool";
 import { citationTool } from "../tools/analysis/citation-tool";
@@ -13,28 +13,30 @@ import { duplicateContentTool } from "../tools/analysis/duplicate-content-tool";
 import { originalityTool } from "../tools/analysis/originality-tool";
 import { readabilityTool } from "../tools/analysis/readability-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
+import { dateTool } from "../tools/date-tool";
 import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
 import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
 import { replaceTextTool } from "../tools/editor/replace-text-tool";
-import { dateTool } from "../tools/date-tool";
 
 const memory = new Memory({
-	options: {
-		lastMessages: 20,
-		generateTitle: {
-			model: "openrouter/google/gemini-2.5-flash-lite",
-		},
-	},
+   options: {
+      lastMessages: 20,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
 });
 
 const getInstructions = (
-	language: string,
-	writerInstructions?: InstructionMemoryItem[],
+   language: string,
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-	const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
-	const languageInstruction = buildLanguageInstruction(language);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
+   const languageInstruction = buildLanguageInstruction(language);
 
-	return `
+   return `
 ${languageInstruction}
 
 ${compiledMemories}
@@ -93,39 +95,39 @@ Respond in the same language as the user request.
 };
 
 export const reviewerAgent: Agent = new Agent({
-	id: "reviewer-agent",
-	name: "Content Reviewer Agent",
-	description:
-		"Specialized in content quality review, tone analysis, readability assessment, citation validation, originality checking, and structural feedback. Use this agent for: reviewing content quality, checking tone consistency, validating citations, detecting AI-sounding patterns, content feedback.",
+   id: "reviewer-agent",
+   name: "Content Reviewer Agent",
+   description:
+      "Specialized in content quality review, tone analysis, readability assessment, citation validation, originality checking, and structural feedback. Use this agent for: reviewing content quality, checking tone consistency, validating citations, detecting AI-sounding patterns, content feedback.",
 
-	model: ({ requestContext }) => {
-		const maybeModel = requestContext?.get("model");
-		return typeof maybeModel === "string" && maybeModel.length > 0
-			? maybeModel
-			: DEFAULT_CONTENT_MODEL_ID;
-	},
+   model: ({ requestContext }) => {
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
+   },
 
-	instructions: ({ requestContext }) => {
-		const writerInstructions = requestContext?.get("writerInstructions") as
-			| InstructionMemoryItem[]
-			| undefined;
-		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getInstructions(language, writerInstructions);
-	},
+   instructions: ({ requestContext }) => {
+      const writerInstructions = requestContext?.get("writerInstructions") as
+         | InstructionMemoryItem[]
+         | undefined;
+      const language = (requestContext?.get("language") as string) ?? "pt-BR";
+      return getInstructions(language, writerInstructions);
+   },
 
-	memory,
+   memory,
 
-	tools: {
-		contentStructure: contentStructureTool,
-		citation: citationTool,
-		originality: originalityTool,
-		toneAnalysis: toneAnalysisTool,
-		readability: readabilityTool,
-		badPatterns: badPatternTool,
-		duplicateContent: duplicateContentTool,
-		addEditorComment: addEditorCommentTool,
-		proposeSuggestion: proposeSuggestionTool,
-		replaceText: replaceTextTool,
-		dateTool: dateTool,
-	},
+   tools: {
+      contentStructure: contentStructureTool,
+      citation: citationTool,
+      originality: originalityTool,
+      toneAnalysis: toneAnalysisTool,
+      readability: readabilityTool,
+      badPatterns: badPatternTool,
+      duplicateContent: duplicateContentTool,
+      addEditorComment: addEditorCommentTool,
+      proposeSuggestion: proposeSuggestionTool,
+      replaceText: replaceTextTool,
+      dateTool: dateTool,
+   },
 });

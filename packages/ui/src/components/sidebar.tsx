@@ -122,21 +122,15 @@ function SidebarManagerShared({
    const sidebarContext = useSidebar();
    const manager = useSidebarManager();
 
-   const sidebarContextRef = React.useRef(sidebarContext);
    const managerRef = React.useRef(manager);
 
    React.useLayoutEffect(() => {
-      sidebarContextRef.current = sidebarContext;
       managerRef.current = manager;
    });
 
    React.useEffect(() => {
-      managerRef.current.register(name, sidebarContextRef.current);
-      return () => managerRef.current.unregister(name);
-   }, [name]);
-
-   React.useEffect(() => {
       managerRef.current.register(name, sidebarContext);
+      return () => managerRef.current.unregister(name);
    }, [name, sidebarContext]);
 
    return <>{children}</>;
@@ -211,19 +205,14 @@ function SidebarManagerIsolated({
    );
 
    const managerRef = React.useRef(manager);
-   const contextRef = React.useRef(contextValue);
+
    React.useLayoutEffect(() => {
       managerRef.current = manager;
-      contextRef.current = contextValue;
    });
 
    React.useEffect(() => {
-      managerRef.current.register(name, contextRef.current);
-      return () => managerRef.current.unregister(name);
-   }, [name]);
-
-   React.useEffect(() => {
       managerRef.current.register(name, contextValue);
+      return () => managerRef.current.unregister(name);
    }, [name, contextValue]);
 
    return (
@@ -865,7 +854,7 @@ function SidebarMenuAction({
             "peer-data-[size=lg]/menu-button:top-2.5",
             "group-data-[collapsible=icon]:hidden",
             showOnHover &&
-            "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
+               "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
             className,
          )}
          data-sidebar="menu-action"

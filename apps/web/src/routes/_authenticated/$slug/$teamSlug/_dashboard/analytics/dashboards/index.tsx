@@ -1,4 +1,10 @@
 import { Button } from "@packages/ui/components/button";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -6,12 +12,10 @@ import { LayoutDashboard, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { DashboardListCard } from "@/features/analytics/ui/dashboard-list-card";
-import {
-   ContextPanelAction,
-   ContextPanelSection,
-} from "@/features/context-panel/context-panel-info";
+import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { orpc } from "@/integrations/orpc/client";
+import { useSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/",
@@ -76,16 +80,22 @@ function DashboardsList() {
 }
 
 function DashboardsPage() {
+   useSidebarSection("dashboards");
    useContextPanelInfo(
-      <ContextPanelSection title="Ações">
-         <ContextPanelAction
-            icon={Plus}
-            label="Novo dashboard"
-            onClick={() => {
-               // TODO: Wire to create dashboard action
-            }}
-         />
-      </ContextPanelSection>,
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo dashboard"
+               onClick={() => {
+                  // TODO: Wire to create dashboard action
+               }}
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
    );
 
    return (
