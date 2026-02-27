@@ -16,10 +16,10 @@ import {
 } from "@packages/ui/components/assistant-ui/attachment";
 import { MarkdownText } from "@packages/ui/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback";
+import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { AgentCallTool } from "./tool-components/agent-call-tool";
 import { EditorTool } from "./tool-components/editor-tool";
 import { ResearchTool } from "./tool-components/research-tool";
-import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@packages/ui/components/button";
 import {
    Select,
