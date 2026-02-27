@@ -241,7 +241,6 @@ interface ComposerProps {
 
 const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
    const [contextItems, setContextItems] = useState<ContextItem[]>([]);
-   const aui = useAui();
    const contentId = useStore(chatContextStore, (s) => s.contextId);
    const prefillledForRef = useRef<string | null>(null);
 
@@ -275,15 +274,6 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
    };
 
    const handleSubmit = () => {
-      if (contextItems.length === 0) return;
-      const contextBlock = contextItems
-         .map((item) => `@${item.label}`)
-         .join(", ");
-      const currentText = aui.composer().getState().text;
-      const separator = currentText.trim() ? "\n\n" : "";
-      aui.composer().setText(
-         `[Contexto: ${contextBlock}]${separator}${currentText}`,
-      );
       setContextItems([]);
    };
 
