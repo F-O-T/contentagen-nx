@@ -16,6 +16,7 @@ import {
   Sparkles,
   Table,
   Tag,
+  Trash2,
   Type,
   Wand2,
   type LucideIcon,
@@ -68,7 +69,7 @@ export const TOOL_DISPLAY_CONFIG: Record<string, ToolDisplayConfig> = {
   // ── Editor tools ─────────────────────────────────────────────────
   insertText: { icon: PenLine, label: "Inserindo texto", category: "editor" },
   replaceText: { icon: Wand2, label: "Substituindo texto", category: "editor" },
-  deleteText: { icon: PenLine, label: "Removendo texto", category: "editor" },
+  deleteText: { icon: Trash2, label: "Removendo texto", category: "editor" },
   formatText: { icon: Type, label: "Formatando texto", category: "editor" },
   insertHeading: { icon: Hash, label: "Inserindo título", category: "editor" },
   insertList: { icon: List, label: "Inserindo lista", category: "editor" },
@@ -92,8 +93,6 @@ export const TOOL_DISPLAY_CONFIG: Record<string, ToolDisplayConfig> = {
   factFinder: { icon: Search, label: "Verificando dados", category: "research" },
   webCrawl: { icon: Globe, label: "Analisando página", category: "research" },
   researchCompleteness: { icon: CheckCircle, label: "Validando pesquisa", category: "research" },
-  searchPreviousContent: { icon: BookOpen, label: "Verificando conteúdo existente", category: "memory" },
-  graphSearch: { icon: Search, label: "Buscando conhecimento", category: "memory" },
 
   // ── SEO editor tools ─────────────────────────────────────────────
   optimizeTitle: { icon: Type, label: "Otimizando título", category: "seo" },
@@ -120,6 +119,8 @@ export const TOOL_DISPLAY_CONFIG: Record<string, ToolDisplayConfig> = {
   originality: { icon: Sparkles, label: "Verificando originalidade", category: "analysis" },
 
   // ── Memory & Utility ─────────────────────────────────────────────
+  searchPreviousContent: { icon: BookOpen, label: "Verificando conteúdo existente", category: "memory" },
+  graphSearch: { icon: Search, label: "Buscando conhecimento", category: "memory" },
   getInstructionMemories: { icon: BookOpen, label: "Carregando preferências", category: "memory" },
   dateTool: { icon: FileText, label: "Obtendo data atual", category: "utility" },
 };
