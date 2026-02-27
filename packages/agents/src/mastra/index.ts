@@ -17,6 +17,7 @@ import { researchAgent } from "./agents/research-agent";
 import { reviewerAgent } from "./agents/reviewer-agent";
 import { seoAuditorAgent } from "./agents/seo-auditor-agent";
 import { writerAgent } from "./agents/writer-agent";
+import { contentCreationWorkflow } from "./workflows/content-creation-workflow";
 export type { RequestContext };
 
 export type CustomRequestContext = {
@@ -33,6 +34,7 @@ export type CustomRequestContext = {
    frequencyPenalty?: number;
    presencePenalty?: number;
    onBodyUpdate?: (toolName: string, output: Record<string, unknown>) => Promise<void>;
+   onMetaUpdate?: (patch: Record<string, unknown>) => Promise<void>;
 };
 
 const mastraStorage = new PostgresStore({
@@ -72,6 +74,9 @@ export const mastra: Mastra = new Mastra({
       reviewerAgent,
       fimAgent,
       inlineEditAgent,
+   },
+   workflows: {
+      contentCreationWorkflow,
    },
    vectors: { pgVector: pgVectorStore },
    storage: mastraStorage,
@@ -116,6 +121,11 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.onBodyUpdate) {
       requestContext.set("onBodyUpdate", context.onBodyUpdate);
    }
+   if (context.onMetaUpdate) {
+      requestContext.set("onMetaUpdate", context.onMetaUpdate);
+   }
    return requestContext;
 }
+export { contentCreationWorkflow };
+export { handleWorkflowStream } from "@mastra/ai-sdk";
 export * from "@mastra/ai-sdk";
