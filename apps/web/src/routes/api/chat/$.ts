@@ -43,6 +43,16 @@ export const Route = createFileRoute("/api/chat/$")({
             const { messages, threadId, router = "auto", contextId, workflow } = body;
             const resourceId = `${teamId}:${userId}`;
 
+            // Guard: verify contextId belongs to the session's active team
+            if (contextId) {
+               const contentRecord = await getContentById(db, contextId);
+               if (!contentRecord || contentRecord.teamId !== teamId) {
+                  return new Response("Content not found or access denied", {
+                     status: 403,
+                  });
+               }
+            }
+
             function extractMarkdown(
                _toolName: string,
                output: Record<string, unknown>,
