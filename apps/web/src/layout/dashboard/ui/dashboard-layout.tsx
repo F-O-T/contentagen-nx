@@ -154,10 +154,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         className={cn(
                            "relative flex-1",
                            isEditorPage || isChatPage
-                              ? "overflow-hidden p-0"
+                              ? "overflow-hidden "
                               : isSettingsPage
-                                ? "overflow-hidden p-4"
-                                : "overflow-y-auto p-4",
+                                 ? "overflow-hidden p-4"
+                                 : "overflow-y-auto p-4",
                         )}
                      >
                         {children}

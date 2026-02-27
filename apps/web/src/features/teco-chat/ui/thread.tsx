@@ -95,7 +95,7 @@ export const Thread: FC<ThreadProps> = ({
          }}
       >
          <ThreadPrimitive.Viewport
-            className="aui-thread-viewport relative flex flex-1 flex-col overflow-y-auto scroll-smooth px-4 pt-4"
+            className="aui-thread-viewport relative flex flex-1 flex-col overflow-y-auto scroll-smooth "
             turnAnchor="top"
          >
             <AuiIf condition={(s) => s.thread.isEmpty}>
@@ -116,7 +116,7 @@ export const Thread: FC<ThreadProps> = ({
                }}
             />
 
-            <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
+            <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 ">
                <AuiIf condition={(s) => !s.thread.isEmpty}>
                   <ThreadScrollToBottom />
                   <AgentNetworkStatus />
