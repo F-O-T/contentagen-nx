@@ -26,6 +26,7 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { cn } from "@packages/ui/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-store";
 import {
    ArrowDownIcon,
@@ -35,20 +36,17 @@ import {
    ChevronRightIcon,
    CopyIcon,
    DownloadIcon,
-   Loader2,
+
    MoreHorizontalIcon,
    PencilIcon,
    RefreshCwIcon,
    SparklesIcon,
    SquareIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { FC, ReactNode } from "react";
-import { useState } from "react";
-import {
-   AGENT_DISPLAY_NAMES,
-   type AgentStatus,
-   agentNetworkStore,
-} from "@/features/editor/stores/agent-network-store";
+import { chatContextStore } from "@/features/teco-chat/stores/chat-context-store";
+import { orpc } from "@/integrations/orpc/client";
 import { type ContextItem, ContextPicker } from "./context-picker";
 
 const MODES = [
@@ -68,7 +66,7 @@ export interface ThreadProps {
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
    onModeChange?: (mode: string) => void;
-   defaultMode?: string;
+   mode?: string;
 }
 
 export const Thread: FC<ThreadProps> = ({
@@ -78,14 +76,8 @@ export const Thread: FC<ThreadProps> = ({
    quickSuggestions,
    recentThreadsSlot,
    onModeChange,
-   defaultMode = "auto",
+   mode = "auto",
 }) => {
-   const [mode, setMode] = useState<string>(defaultMode);
-
-   const handleModeChange = (value: string) => {
-      setMode(value);
-      onModeChange?.(value);
-   };
 
    return (
       <ThreadPrimitive.Root
@@ -119,9 +111,8 @@ export const Thread: FC<ThreadProps> = ({
             <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 ">
                <AuiIf condition={(s) => !s.thread.isEmpty}>
                   <ThreadScrollToBottom />
-                  <AgentNetworkStatus />
                </AuiIf>
-               <Composer mode={mode} onModeChange={handleModeChange} />
+               <Composer mode={mode} onModeChange={onModeChange} />
             </ThreadPrimitive.ViewportFooter>
          </ThreadPrimitive.Viewport>
       </ThreadPrimitive.Root>
@@ -245,12 +236,33 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
 
 interface ComposerProps {
    mode: string;
-   onModeChange: (value: string) => void;
+   onModeChange?: (value: string) => void;
 }
 
 const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
    const [contextItems, setContextItems] = useState<ContextItem[]>([]);
    const aui = useAui();
+   const contentId = useStore(chatContextStore, (s) => s.contextId);
+   const prefillledForRef = useRef<string | null>(null);
+
+   const { data: contentData } = useQuery({
+      ...orpc.content.getById.queryOptions({ input: { id: contentId ?? "" } }),
+      enabled: !!contentId,
+   });
+
+   useEffect(() => {
+      if (contentId && contentData && prefillledForRef.current !== contentId) {
+         prefillledForRef.current = contentId;
+         setContextItems([{
+            type: "current-document",
+            id: contentId,
+            label: contentData.meta?.title ?? "Documento atual",
+         }]);
+      } else if (!contentId) {
+         prefillledForRef.current = null;
+         setContextItems([]);
+      }
+   }, [contentId, contentData]);
 
    const handleContextSelect = (item: ContextItem) => {
       setContextItems((prev) =>
@@ -327,7 +339,11 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
                         ))}
                      </SelectContent>
                   </Select>
-                  <ContextPicker onSelect={handleContextSelect} />
+                  <ContextPicker
+                     currentDocumentId={contentId ?? undefined}
+                     currentDocumentLabel={contentData?.meta?.title ?? "Documento atual"}
+                     onSelect={handleContextSelect}
+                  />
                </div>
                <ComposerAction />
             </div>
@@ -549,62 +565,3 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
    );
 };
 
-const AgentNetworkStatus: FC = () => {
-   const { isActive, agents } = useStore(agentNetworkStore);
-
-   if (!isActive || agents.length === 0) return null;
-
-   const activeAgent = agents.find((a) => a.status === "running");
-   const routerDone = agents.length > 0;
-
-   return (
-      <div className="w-full rounded-lg border border-border bg-muted/50 px-3 py-2.5">
-         <div className="mb-2 flex items-center gap-2">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            <span className="text-xs font-medium text-muted-foreground">
-               Agent Network
-            </span>
-            {activeAgent && (
-               <>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className="text-xs text-foreground">
-                     {AGENT_DISPLAY_NAMES[activeAgent.id] ?? activeAgent.id}
-                  </span>
-               </>
-            )}
-         </div>
-
-         <div className="mb-1.5 flex items-center gap-2 text-xs">
-            {routerDone ? (
-               <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
-            ) : (
-               <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-            )}
-            <span className="text-muted-foreground">Content Router</span>
-         </div>
-
-         <div className="ml-3 flex flex-col gap-1 border-l border-border/40 pl-2.5">
-            {agents.map((agent) => (
-               <AgentRow id={agent.id} key={agent.id} status={agent.status} />
-            ))}
-         </div>
-      </div>
-   );
-};
-
-const AgentRow: FC<{ id: string; status: AgentStatus }> = ({ id, status }) => (
-   <div className="flex items-center gap-2 text-xs">
-      {status === "running" ? (
-         <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-      ) : (
-         <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
-      )}
-      <span
-         className={
-            status === "running" ? "text-foreground" : "text-muted-foreground"
-         }
-      >
-         {AGENT_DISPLAY_NAMES[id] ?? id}
-      </span>
-   </div>
-);
