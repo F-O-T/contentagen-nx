@@ -1,5 +1,7 @@
 import { createRequestContext, handleChatStream, mastra } from "@packages/agents";
-import { updateContent } from "@packages/database/repositories/content-repository";
+import { getContentById, updateContent } from "@packages/database/repositories/content-repository";
+import { getWriterInstructions } from "@packages/database/repositories/writer-instructions-repository";
+import type { ContentMeta } from "@packages/database/schemas/content";
 import { createFileRoute } from "@tanstack/react-router";
 import type { ModelMessage } from "ai";
 import { createUIMessageStreamResponse } from "ai";
@@ -11,6 +13,18 @@ const ROUTER_PREFIX_MAP: Record<string, string> = {
    auto: "",
    content: "[Usar content-agent]:",
 };
+
+async function loadContentContext(
+   dbClient: typeof db,
+   contentId: string,
+) {
+   const contentRecord = await getContentById(dbClient, contentId);
+   const writerId = contentRecord?.writerId ?? undefined;
+   const writerInstructions = writerId
+      ? await getWriterInstructions(dbClient, writerId)
+      : undefined;
+   return { contentId, writerId, writerInstructions };
+}
 
 export const Route = createFileRoute("/api/chat/$")({
    server: {
@@ -38,6 +52,8 @@ export const Route = createFileRoute("/api/chat/$")({
             }
 
             let bodyAccumulator = "";
+            let metaAccumulator: Partial<ContentMeta> = {};
+
             const onBodyUpdate = contextId
                ? async (toolName: string, output: Record<string, unknown>) => {
                     const chunk = extractMarkdown(toolName, output);
@@ -52,6 +68,19 @@ export const Route = createFileRoute("/api/chat/$")({
                        });
                     } catch {
                        // best-effort — don't crash the stream if DB write fails
+                    }
+                 }
+               : undefined;
+
+            const onMetaUpdate = contextId
+               ? async (patch: Record<string, unknown>) => {
+                    Object.assign(metaAccumulator, patch);
+                    try {
+                       await updateContent(db, contextId, {
+                          meta: metaAccumulator as ContentMeta,
+                       });
+                    } catch {
+                       // best-effort
                     }
                  }
                : undefined;
@@ -96,7 +125,13 @@ export const Route = createFileRoute("/api/chat/$")({
                   memory: { resource: resourceId, thread: threadId },
                   requestContext: createRequestContext({
                      userId,
-                     ...(contextId ? { contentId: contextId, onBodyUpdate } : {}),
+                     ...(contextId
+                        ? {
+                             ...(await loadContentContext(db, contextId)),
+                             onBodyUpdate,
+                             onMetaUpdate,
+                          }
+                        : {}),
                   }),
                },
             });
