@@ -1,11 +1,13 @@
-import { handleChatStream, mastra } from "@packages/agents";
+import { createRequestContext, handleChatStream, mastra } from "@packages/agents";
+import { updateContent } from "@packages/database/repositories/content-repository";
 import { createFileRoute } from "@tanstack/react-router";
 import type { ModelMessage } from "ai";
 import { createUIMessageStreamResponse } from "ai";
 
-import { auth } from "@/integrations/orpc/server-instances";
+import { markdownToPlateValue } from "@/features/editor/utils/markdown-to-plate";
+import { auth, db } from "@/integrations/orpc/server-instances";
 
-const MODE_ROUTING_PREFIX: Record<string, string> = {
+const ROUTER_PREFIX_MAP: Record<string, string> = {
    auto: "",
    content: "[Usar content-agent]:",
 };
@@ -23,10 +25,40 @@ export const Route = createFileRoute("/api/chat/$")({
             const teamId = session.session.activeTeamId;
             const userId = session.session.userId;
             const body = await request.json();
-            const { messages, threadId, mode = "auto" } = body;
+            const { messages, threadId, router = "auto", contextId } = body;
             const resourceId = `${teamId}:${userId}`;
 
-            const prefix = MODE_ROUTING_PREFIX[mode] ?? "";
+            function extractMarkdown(
+               _toolName: string,
+               output: Record<string, unknown>,
+            ): string {
+               const md = output.markdown as string | undefined;
+               if (!md) return "";
+               return `\n\n${md.trim()}`;
+            }
+
+            let bodyAccumulator = "";
+            const onBodyUpdate = contextId
+               ? async (toolName: string, output: Record<string, unknown>) => {
+                    const chunk = extractMarkdown(toolName, output);
+                    if (!chunk) return;
+                    bodyAccumulator += chunk;
+                    try {
+                       const plateValue = markdownToPlateValue(
+                          bodyAccumulator.trim(),
+                       );
+                       await updateContent(db, contextId, {
+                          body: JSON.stringify(plateValue),
+                       });
+                    } catch {
+                       // best-effort — don't crash the stream if DB write fails
+                    }
+                 }
+               : undefined;
+
+            // If contextId present, always route to content-agent
+            const effectiveRouter = contextId ? "content" : router;
+            const prefix = ROUTER_PREFIX_MAP[effectiveRouter] ?? "";
             const processedMessages = prefix
                ? messages.map((msg: ModelMessage, idx: number) => {
                     if (idx === messages.length - 1 && msg.role === "user") {
@@ -62,10 +94,30 @@ export const Route = createFileRoute("/api/chat/$")({
                params: {
                   messages: processedMessages,
                   memory: { resource: resourceId, thread: threadId },
+                  requestContext: createRequestContext({
+                     userId,
+                     ...(contextId ? { contentId: contextId, onBodyUpdate } : {}),
+                  }),
                },
             });
 
-            return createUIMessageStreamResponse({ stream });
+            // Filter out Mastra-internal data-* stream parts (e.g. data-tripwire,
+            // data-tool-call-approval). @assistant-ui/react v0.12.x initialises the
+            // `tools` scope in RuntimeAdapter but NOT `dataRenderers`, so any data
+            // message part causes a "scope does not have dataRenderers" crash.
+            const filteredStream = stream.pipeThrough(
+               new TransformStream({
+                  transform(chunk, controller) {
+                     const type = (chunk as { type?: string }).type;
+                     if (typeof type === "string" && type.startsWith("data-")) {
+                        return;
+                     }
+                     controller.enqueue(chunk);
+                  },
+               }),
+            );
+
+            return createUIMessageStreamResponse({ stream: filteredStream });
          },
       },
    },
