@@ -1,18 +1,18 @@
 "use client";
 
 import type { ContentMeta } from "@packages/database/schemas/content";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Link2, Settings2 } from "lucide-react";
 import { useEffect } from "react";
 import {
    registerTab,
    unregisterTab,
 } from "@/features/context-panel/use-context-panel";
-import {
-	ContextPanel,
-	ContextPanelContent,
-	ContextPanelHeader,
-	ContextPanelTitle,
-} from "@packages/ui/components/context-panel";
 import { FrontmatterSection } from "../../ui/frontmatter-section";
 import { InternalLinksSidebar } from "./internal-links-sidebar";
 

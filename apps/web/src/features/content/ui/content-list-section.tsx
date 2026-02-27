@@ -5,7 +5,12 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { DataTable } from "@packages/ui/components/data-table";
 import {
    Empty,
@@ -22,12 +27,6 @@ import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
-import {
-	ContextPanel,
-	ContextPanelContent,
-	ContextPanelHeader,
-	ContextPanelTitle,
-} from "@packages/ui/components/context-panel";
 import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { orpc } from "@/integrations/orpc/client";
@@ -182,19 +181,19 @@ export function ContentListSection() {
    };
 
    useContextPanelInfo(
-		<ContextPanel>
-			<ContextPanelHeader>
-				<ContextPanelTitle>Ações</ContextPanelTitle>
-			</ContextPanelHeader>
-			<ContextPanelContent>
-				<ContextPanelAction
-					icon={Plus}
-					label="Novo conteúdo"
-					onClick={handleCreateNew}
-				/>
-			</ContextPanelContent>
-		</ContextPanel>,
-	);
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo conteúdo"
+               onClick={handleCreateNew}
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
+   );
 
    // Table columns
    const columns = useMemo(

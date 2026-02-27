@@ -2,6 +2,13 @@
 
 import { Button } from "@packages/ui/components/button";
 import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelHeaderActions,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
+import {
    Sidebar,
    SidebarContent,
    SidebarHeader,
@@ -14,17 +21,10 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import {
-	ContextPanel,
-	ContextPanelContent,
-	ContextPanelHeader,
-	ContextPanelHeaderActions,
-	ContextPanelTitle,
-} from "@packages/ui/components/context-panel";
-import { useStore } from "@tanstack/react-store";
-import { ArrowUpRight, Info, MessageSquare, X } from "lucide-react";
-import type React from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-store";
+import { Info, MessageSquare, MoveDiagonalIcon, X } from "lucide-react";
+import type React from "react";
 import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
 import { TecoChatTab } from "./ui/teco-chat-tab";
 import {
@@ -39,7 +39,9 @@ function InfoContent() {
       return (
          <ContextPanel>
             <ContextPanelContent className="flex items-center justify-center p-6">
-               <p className="text-sm text-muted-foreground/50">Sem informações</p>
+               <p className="text-sm text-muted-foreground/50">
+                  Sem informações
+               </p>
             </ContextPanelContent>
          </ContextPanel>
       );
@@ -56,7 +58,7 @@ function ChatContent() {
    return (
       <ContextPanel>
          <ContextPanelHeader>
-            <ContextPanelTitle>Chat IA</ContextPanelTitle>
+            <ContextPanelTitle>Teco AI</ContextPanelTitle>
             <ContextPanelHeaderActions>
                <Button
                   className="size-6 rounded"
@@ -70,7 +72,7 @@ function ChatContent() {
                   type="button"
                   variant="ghost"
                >
-                  <ArrowUpRight className="size-3.5" />
+                  <MoveDiagonalIcon className="size-4" />
                </Button>
             </ContextPanelHeaderActions>
          </ContextPanelHeader>

@@ -1,4 +1,10 @@
 import { Button } from "@packages/ui/components/button";
+import {
+   ContextPanel,
+   ContextPanelContent,
+   ContextPanelHeader,
+   ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -6,12 +12,6 @@ import { LayoutDashboard, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { DashboardListCard } from "@/features/analytics/ui/dashboard-list-card";
-import {
-	ContextPanel,
-	ContextPanelContent,
-	ContextPanelHeader,
-	ContextPanelTitle,
-} from "@packages/ui/components/context-panel";
 import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { orpc } from "@/integrations/orpc/client";
@@ -82,21 +82,21 @@ function DashboardsList() {
 function DashboardsPage() {
    useSidebarSection("dashboards");
    useContextPanelInfo(
-		<ContextPanel>
-			<ContextPanelHeader>
-				<ContextPanelTitle>Ações</ContextPanelTitle>
-			</ContextPanelHeader>
-			<ContextPanelContent>
-				<ContextPanelAction
-					icon={Plus}
-					label="Novo dashboard"
-					onClick={() => {
-						// TODO: Wire to create dashboard action
-					}}
-				/>
-			</ContextPanelContent>
-		</ContextPanel>,
-	);
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Ações</ContextPanelTitle>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <ContextPanelAction
+               icon={Plus}
+               label="Novo dashboard"
+               onClick={() => {
+                  // TODO: Wire to create dashboard action
+               }}
+            />
+         </ContextPanelContent>
+      </ContextPanel>,
+   );
 
    return (
       <main className="flex flex-col gap-4">
