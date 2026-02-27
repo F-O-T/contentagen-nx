@@ -16,6 +16,9 @@ import {
 } from "@packages/ui/components/assistant-ui/attachment";
 import { MarkdownText } from "@packages/ui/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback";
+import { AgentCallTool } from "./tool-components/agent-call-tool";
+import { EditorTool } from "./tool-components/editor-tool";
+import { ResearchTool } from "./tool-components/research-tool";
 import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -398,7 +401,66 @@ const AssistantMessage: FC = () => {
             <MessagePrimitive.Parts
                components={{
                   Text: MarkdownText,
-                  tools: { Fallback: ToolFallback },
+                  tools: {
+                     Fallback: ToolFallback,
+                     by_name: {
+                        // Agent sub-calls
+                        "agent-research-agent": AgentCallTool,
+                        "agent-writer-agent": AgentCallTool,
+                        "agent-seo-auditor-agent": AgentCallTool,
+                        "agent-reviewer-agent": AgentCallTool,
+                        "agent-content-agent": AgentCallTool,
+                        // Editor tools
+                        insertText: EditorTool,
+                        replaceText: EditorTool,
+                        deleteText: EditorTool,
+                        formatText: EditorTool,
+                        insertHeading: EditorTool,
+                        insertList: EditorTool,
+                        insertCodeBlock: EditorTool,
+                        insertTable: EditorTool,
+                        addEditorComment: EditorTool,
+                        proposeSuggestion: EditorTool,
+                        // Frontmatter tools
+                        editTitle: EditorTool,
+                        editDescription: EditorTool,
+                        editKeywords: EditorTool,
+                        editSlug: EditorTool,
+                        // Research tools
+                        webSearch: ResearchTool,
+                        serpAnalysis: ResearchTool,
+                        competitorContent: ResearchTool,
+                        contentGap: ResearchTool,
+                        relatedKeywords: ResearchTool,
+                        factFinder: ResearchTool,
+                        webCrawl: ResearchTool,
+                        researchCompleteness: ResearchTool,
+                        searchPreviousContent: ResearchTool,
+                        graphSearch: ResearchTool,
+                        // Analysis tools (SEO auditor + reviewer)
+                        seoScore: ResearchTool,
+                        readability: ResearchTool,
+                        keywordDensity: ResearchTool,
+                        contentStructure: ResearchTool,
+                        badPatterns: ResearchTool,
+                        titleMeta: ResearchTool,
+                        quickAnswerAnalysis: ResearchTool,
+                        imageSeo: ResearchTool,
+                        linkDensity: ResearchTool,
+                        duplicateContent: ResearchTool,
+                        toneAnalysis: ResearchTool,
+                        citation: ResearchTool,
+                        originality: ResearchTool,
+                        // SEO editor tools
+                        optimizeTitle: EditorTool,
+                        optimizeMeta: EditorTool,
+                        injectKeywords: EditorTool,
+                        addInternalLinks: EditorTool,
+                        addExternalLinks: EditorTool,
+                        improveReadability: EditorTool,
+                        generateQuickAnswer: EditorTool,
+                     },
+                  },
                }}
             />
             <MessageError />
