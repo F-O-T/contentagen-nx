@@ -3,7 +3,7 @@
 import type { ContentMeta } from "@packages/database/schemas/content";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import type { Value } from "platejs";
+import type { SlateEditor, Value } from "platejs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import {
@@ -59,6 +59,8 @@ export function EditorPage({ contentId }: EditorPageProps) {
    const [isSaving, setIsSaving] = useState(false);
 
    const editorValueRef = useRef<Value | undefined>(undefined);
+   const plateEditorRef = useRef<SlateEditor | null>(null);
+   const lastAppliedBodyRef = useRef<string | null>(httpContent?.body ?? null);
 
    const updateMutation = useMutation(orpc.content.update.mutationOptions({}));
    const publishMutation = useMutation(
@@ -110,15 +112,26 @@ export function EditorPage({ contentId }: EditorPageProps) {
       [contentId, updateMutation],
    );
 
+   // Watch Electric CDC body updates from agent writes
    useEffect(() => {
-      const listener = () => {
-         handleSave();
-      };
-      window.addEventListener("editor-bridge-save", listener);
-      return () => {
-         window.removeEventListener("editor-bridge-save", listener);
-      };
-   }, [handleSave]);
+      const incomingBody = liveContent?.body ?? null;
+      if (
+         !incomingBody ||
+         incomingBody === lastAppliedBodyRef.current ||
+         !plateEditorRef.current
+      ) {
+         return;
+      }
+      try {
+         const parsed = JSON.parse(incomingBody) as Value;
+         // biome-ignore lint/suspicious/noExplicitAny: PlateJS tf.setValue not typed on SlateEditor
+         (plateEditorRef.current as any).tf.setValue(parsed);
+         lastAppliedBodyRef.current = incomingBody;
+         editorValueRef.current = parsed;
+      } catch {
+         // malformed body — ignore
+      }
+   }, [liveContent?.body]);
 
    useContextPanelInfo(
       <>
@@ -133,6 +146,7 @@ export function EditorPage({ contentId }: EditorPageProps) {
          <PlateEditor
             contentId={contentId}
             editable={liveStatus !== "archived"}
+            editorRef={plateEditorRef}
             initialValue={
                httpContent?.body ? (JSON.parse(httpContent.body) as Value) : undefined
             }
