@@ -19,6 +19,7 @@ services:
 
   contentta-db:
     image: docker.io/postgres:15
+    command: postgres -c wal_level=logical
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -52,6 +53,20 @@ services:
       - pgvector_data:/var/lib/postgresql/data
     ports:
       - "8000:5432"
+
+  electric:
+    image: electricsql/electric:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:password@contentta-db:5432/contentta
+    ports:
+      - "3001:3000"
+    depends_on:
+      - contentta-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   contentta_pgdata:
