@@ -10,6 +10,7 @@ import {
    createContentCollection,
    type ContentRow,
 } from "@/features/content/collections/content-collection";
+import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
 import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
@@ -20,10 +21,13 @@ type ContentStatus = "draft" | "published" | "archived";
 
 interface EditorPageProps {
    contentId: string;
-   teamId: string;
 }
 
-export function EditorPage({ contentId, teamId }: EditorPageProps) {
+export function EditorPage({ contentId }: EditorPageProps) {
+   // teamId from session — safe here since EditorPage is always inside <Suspense>
+   const { activeTeamId } = useActiveTeam();
+   const teamId = activeTeamId ?? "";
+
    // Electric collection scoped to this team — memoized so it's stable across renders.
    const collection = useMemo(
       () => (teamId ? createContentCollection(teamId) : null),

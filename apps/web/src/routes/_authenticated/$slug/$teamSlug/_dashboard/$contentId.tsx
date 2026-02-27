@@ -8,7 +8,6 @@ import {
    resetChatContext,
    setChatContext,
 } from "@/features/teco-chat/stores/chat-context-store";
-import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
@@ -105,13 +104,11 @@ function EditorSkeleton() {
 
 function EditorRoute() {
    const { contentId } = Route.useParams();
-   // useActiveTeam uses useSuspenseQuery — safe here because EditorPage is inside a Suspense boundary.
-   const { activeTeamId } = useActiveTeam();
 
    return (
       <ErrorBoundary FallbackComponent={EditorErrorFallback}>
          <Suspense fallback={<EditorSkeleton />}>
-            <EditorPage contentId={contentId} teamId={activeTeamId ?? ""} />
+            <EditorPage contentId={contentId} />
          </Suspense>
       </ErrorBoundary>
    );
