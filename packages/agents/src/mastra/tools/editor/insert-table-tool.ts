@@ -32,18 +32,28 @@ export const insertTableTool = createTool({
       columnCount: z.number(),
       rowCount: z.number(),
    }),
-   execute: async (inputData) => {
+   execute: async (inputData, context) => {
       const markdown = generateTableString(
          inputData.headers,
          inputData.rows,
          inputData.alignments,
       );
 
-      return {
+      const result = {
          success: true,
          markdown,
          columnCount: inputData.headers.length,
          rowCount: inputData.rows.length,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate("insert-table", result as Record<string, unknown>);
+      }
+
+      return result;
    },
 });

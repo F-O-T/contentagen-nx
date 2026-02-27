@@ -32,7 +32,7 @@ export const insertListTool = createTool({
       type: z.string(),
       itemCount: z.number(),
    }),
-   execute: async (inputData) => {
+   execute: async (inputData, context) => {
       // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
       const normalizedItems = inputData.items.map(normalizeMarkdownEmphasis);
 
@@ -49,11 +49,21 @@ export const insertListTool = createTool({
          markdown = generateListString(normalizedItems, ordered);
       }
 
-      return {
+      const result = {
          success: true,
          markdown,
          type: inputData.type,
          itemCount: normalizedItems.length,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate("insert-list", result as Record<string, unknown>);
+      }
+
+      return result;
    },
 });

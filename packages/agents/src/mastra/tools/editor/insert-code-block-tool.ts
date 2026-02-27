@@ -33,18 +33,31 @@ export const insertCodeBlockTool = createTool({
       language: z.string().optional(),
       lineCount: z.number(),
    }),
-   execute: async (inputData) => {
+   execute: async (inputData, context) => {
       const markdown = generateCodeBlockString(
          inputData.code,
          inputData.language,
          "fenced",
       );
 
-      return {
+      const result = {
          success: true,
          markdown,
          language: inputData.language,
          lineCount: inputData.code.split("\n").length,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate(
+            "insert-code-block",
+            result as Record<string, unknown>,
+         );
+      }
+
+      return result;
    },
 });

@@ -33,7 +33,7 @@ export const insertHeadingTool = createTool({
       level: z.string(),
       text: z.string(),
    }),
-   execute: async (inputData) => {
+   execute: async (inputData, context) => {
       // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
       const normalizedText = normalizeMarkdownEmphasis(inputData.text);
 
@@ -46,11 +46,21 @@ export const insertHeadingTool = createTool({
          | 6;
       const markdown = generateHeadingString(levelNum, normalizedText);
 
-      return {
+      const result = {
          success: true,
          markdown,
          level: inputData.level,
          text: normalizedText,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate("insert-heading", result as Record<string, unknown>);
+      }
+
+      return result;
    },
 });

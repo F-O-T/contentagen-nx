@@ -34,7 +34,7 @@ export const insertTextTool = createTool({
       insertedText: z.string(),
       position: z.string(),
    }),
-   execute: async (inputData) => {
+   execute: async (inputData, context) => {
       // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
       const normalizedText = normalizeMarkdownEmphasis(inputData.text);
 
@@ -43,11 +43,21 @@ export const insertTextTool = createTool({
          ? generateBlockquoteString(normalizedText)
          : normalizedText;
 
-      return {
+      const result = {
          success: true,
          markdown,
          insertedText: normalizedText,
          position: inputData.position,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate("insert-text", result as Record<string, unknown>);
+      }
+
+      return result;
    },
 });
