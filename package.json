@@ -140,6 +140,8 @@
             "elysia": "1.4.25"
          },
          "tanstack": {
+            "@tanstack/react-db": "^0.1.74",
+            "@tanstack/electric-db-collection": "^0.2.37",
             "@tanstack/react-form": "^1.28.3",
             "@tanstack/react-query": "^5.90.21",
             "@tanstack/react-query-devtools": "^5.91.3",

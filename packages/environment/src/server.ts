@@ -7,7 +7,7 @@ export const env = createEnv({
       DATABASE_URL: z.url(),
       PG_VECTOR_URL: z.url().optional(),
       REDIS_URL: z.url().optional().default("redis://localhost:6379"),
-      // Electric Sync Engine (Required for live queries)
+      // Electric Sync Engine (optional — enables live queries feature)
       ELECTRIC_URL: z.url().optional().default("http://localhost:3001"),
 
       // Better Auth (Required core, optional providers)
