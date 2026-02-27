@@ -28,8 +28,7 @@ const AgentCallToolImpl: ToolCallMessagePartComponent = ({ toolName, status }) =
           className={cn(
             "flex size-8 shrink-0 items-center justify-center rounded-full",
             isRunning && "bg-primary/10 text-primary",
-            !isRunning && !isCancelled && "bg-muted text-muted-foreground",
-            isCancelled && "bg-muted text-muted-foreground",
+            !isRunning && "bg-muted text-muted-foreground",
           )}
         >
           <Icon className="size-4" />
@@ -61,7 +60,7 @@ const AgentCallToolImpl: ToolCallMessagePartComponent = ({ toolName, status }) =
         {isRunning && (
           <LoaderIcon className="size-4 animate-spin text-primary" />
         )}
-        {statusType === "complete" && !isCancelled && (
+        {statusType === "complete" && (
           <CheckIcon className="size-4 text-muted-foreground" />
         )}
         {isCancelled && (
