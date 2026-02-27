@@ -9,6 +9,8 @@ export type ContentRow = {
 	writer_id: string | null;
 	created_by_member_id: string;
 	status: "draft" | "published" | "archived";
+	share_status: "private" | "shared";
+	draft_origin: "manual" | "ai_generated";
 	meta: Record<string, unknown>;
 	body: string | null;
 	created_at: string;
