@@ -213,9 +213,9 @@ function SidebarScopeSwitcherContent() {
             if (pathname.startsWith(`${prefix}/`)) {
                nextPath = params.teamSlug
                   ? pathname.replace(
-                     `${prefix}/${params.teamSlug}`,
-                     `${prefix}/${teamParam}`,
-                  )
+                       `${prefix}/${params.teamSlug}`,
+                       `${prefix}/${teamParam}`,
+                    )
                   : `/${currentSlug}/${teamParam}${pathname.slice(prefix.length)}`;
             }
 
@@ -403,7 +403,7 @@ function SidebarScopeSwitcherContent() {
                            <Plus className="size-4" />
                            <span>
                               {projectLimit !== null &&
-                                 projectLimit !== Number.POSITIVE_INFINITY
+                              projectLimit !== Number.POSITIVE_INFINITY
                                  ? `Novo projeto (${projectCount}/${projectLimit})`
                                  : "Novo projeto"}
                            </span>

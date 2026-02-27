@@ -8,9 +8,9 @@ import {
 } from "@tanstack/react-router";
 import { MessageSquarePlusIcon } from "lucide-react";
 import { useEffect } from "react";
+import { closeContextPanel } from "@/features/context-panel/use-context-panel";
 import { useTecoRuntime } from "@/features/teco-chat/hooks/use-teco-runtime";
 import { ThreadList } from "@/features/teco-chat/ui/thread-list";
-import { closeContextPanel } from "@/features/context-panel/use-context-panel";
 import { useActiveTeam } from "@/hooks/use-active-team";
 
 export const Route = createFileRoute(

@@ -9,10 +9,10 @@ import type { InstructionMemoryItem } from "@packages/database/schemas/instructi
 import { env as serverEnv } from "@packages/environment/server";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
-import { platformRouterAgent } from "./agents/platform-router-agent";
 import { contentAgent } from "./agents/content-agent";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
+import { platformRouterAgent } from "./agents/platform-router-agent";
 import { researchAgent } from "./agents/research-agent";
 import { reviewerAgent } from "./agents/reviewer-agent";
 import { seoAuditorAgent } from "./agents/seo-auditor-agent";

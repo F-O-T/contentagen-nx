@@ -9,12 +9,6 @@
  */
 
 import { AILoadingBar, AIMenu } from "@packages/ui/components/ai-menu";
-import {
-	NETWORK_AGENT_IDS,
-	completeNetworkAgent,
-	resetAgentNetwork,
-	startNetworkAgent,
-} from "@/features/editor/stores/agent-network-store";
 import { AIAnchorElement, AILeaf } from "@packages/ui/components/ai-node";
 import { CursorOverlayKit } from "@packages/ui/components/editor/plugins/cursor-overlay-kit";
 import { MarkdownKit } from "@packages/ui/components/editor/plugins/markdown-kit";
@@ -30,6 +24,12 @@ import type { ChatTransport, UIMessage, UIMessageChunk } from "ai";
 import { getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
 import type { ChatChunk } from "@/features/editor/schemas";
+import {
+   completeNetworkAgent,
+   NETWORK_AGENT_IDS,
+   resetAgentNetwork,
+   startNetworkAgent,
+} from "@/features/editor/stores/agent-network-store";
 import { client } from "@/integrations/orpc/client";
 
 // ---------------------------------------------------------------------------

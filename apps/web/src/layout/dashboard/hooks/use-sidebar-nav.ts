@@ -79,8 +79,10 @@ export function useSidebarSection(section: SubSidebarSection) {
       return () => {
          sidebarNavStore.setState((state) => ({
             ...state,
-            activeSection: state.activeSection === section ? null : state.activeSection,
-            searchQuery: state.activeSection === section ? "" : state.searchQuery,
+            activeSection:
+               state.activeSection === section ? null : state.activeSection,
+            searchQuery:
+               state.activeSection === section ? "" : state.searchQuery,
          }));
       };
    }, [section]);

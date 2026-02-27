@@ -3,8 +3,8 @@ import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
-	buildLanguageInstruction,
-	compileInstructionMemories,
+   buildLanguageInstruction,
+   compileInstructionMemories,
 } from "../../utils";
 import { badPatternTool } from "../tools/analysis/bad-pattern-tool";
 import { citationTool } from "../tools/analysis/citation-tool";
@@ -19,37 +19,39 @@ import { readabilityTool } from "../tools/analysis/readability-tool";
 import { seoScoreTool } from "../tools/analysis/seo-score-tool";
 import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
-import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
+import { dateTool } from "../tools/date-tool";
+import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
+import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
+import { generateQuickAnswerTool } from "../tools/editor/generate-quick-answer-tool";
+import { improveReadabilityTool } from "../tools/editor/improve-readability-tool";
+import { injectKeywordsTool } from "../tools/editor/inject-keywords-tool";
+import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
+import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
+import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
 import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
 import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
 import { editSlugTool } from "../tools/frontmatter/edit-slug-tool";
-import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
-import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
-import { injectKeywordsTool } from "../tools/editor/inject-keywords-tool";
-import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
-import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
-import { improveReadabilityTool } from "../tools/editor/improve-readability-tool";
-import { generateQuickAnswerTool } from "../tools/editor/generate-quick-answer-tool";
-import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
-import { dateTool } from "../tools/date-tool";
+import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
 
 const memory = new Memory({
-	options: {
-		lastMessages: 20,
-		generateTitle: {
-			model: "openrouter/google/gemini-2.5-flash-lite",
-		},
-	},
+   options: {
+      lastMessages: 20,
+      generateTitle: {
+         model: "openrouter/google/gemini-2.5-flash-lite",
+      },
+   },
 });
 
 const getInstructions = (
-	language: string,
-	writerInstructions?: InstructionMemoryItem[],
+   language: string,
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-	const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
-	const languageInstruction = buildLanguageInstruction(language);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
+   const languageInstruction = buildLanguageInstruction(language);
 
-	return `
+   return `
 ${languageInstruction}
 
 ${compiledMemories}
@@ -106,54 +108,54 @@ Respond in the same language as the user request.
 };
 
 export const seoAuditorAgent: Agent = new Agent({
-	id: "seo-auditor-agent",
-	name: "SEO Auditor Agent",
-	description:
-		"Specialized in SEO analysis, scoring, keyword density, readability, title/meta optimization, link density, image SEO, duplicate content detection, and applying SEO improvements. Use this agent for: SEO audits, SEO scores, keyword optimization, meta description optimization, readability improvements.",
+   id: "seo-auditor-agent",
+   name: "SEO Auditor Agent",
+   description:
+      "Specialized in SEO analysis, scoring, keyword density, readability, title/meta optimization, link density, image SEO, duplicate content detection, and applying SEO improvements. Use this agent for: SEO audits, SEO scores, keyword optimization, meta description optimization, readability improvements.",
 
-	model: ({ requestContext }) => {
-		const maybeModel = requestContext?.get("model");
-		return typeof maybeModel === "string" && maybeModel.length > 0
-			? maybeModel
-			: DEFAULT_CONTENT_MODEL_ID;
-	},
+   model: ({ requestContext }) => {
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
+   },
 
-	instructions: ({ requestContext }) => {
-		const writerInstructions = requestContext?.get("writerInstructions") as
-			| InstructionMemoryItem[]
-			| undefined;
-		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getInstructions(language, writerInstructions);
-	},
+   instructions: ({ requestContext }) => {
+      const writerInstructions = requestContext?.get("writerInstructions") as
+         | InstructionMemoryItem[]
+         | undefined;
+      const language = (requestContext?.get("language") as string) ?? "pt-BR";
+      return getInstructions(language, writerInstructions);
+   },
 
-	memory,
+   memory,
 
-	tools: {
-		seoScore: seoScoreTool,
-		readability: readabilityTool,
-		keywordDensity: keywordDensityTool,
-		contentStructure: contentStructureTool,
-		badPatterns: badPatternTool,
-		titleMeta: titleMetaTool,
-		quickAnswerAnalysis: quickAnswerAnalysisTool,
-		imageSeo: imageSeoTool,
-		linkDensity: linkDensityTool,
-		duplicateContent: duplicateContentTool,
-		toneAnalysis: toneAnalysisTool,
-		citation: citationTool,
-		originality: originalityTool,
-		editTitle: editTitleTool,
-		editDescription: editDescriptionTool,
-		editKeywords: editKeywordsTool,
-		editSlug: editSlugTool,
-		optimizeTitle: optimizeTitleTool,
-		optimizeMeta: optimizeMetaTool,
-		injectKeywords: injectKeywordsTool,
-		addInternalLinks: addInternalLinksTool,
-		addExternalLinks: addExternalLinksTool,
-		improveReadability: improveReadabilityTool,
-		generateQuickAnswer: generateQuickAnswerTool,
-		suggestImages: suggestImagesTool,
-		dateTool: dateTool,
-	},
+   tools: {
+      seoScore: seoScoreTool,
+      readability: readabilityTool,
+      keywordDensity: keywordDensityTool,
+      contentStructure: contentStructureTool,
+      badPatterns: badPatternTool,
+      titleMeta: titleMetaTool,
+      quickAnswerAnalysis: quickAnswerAnalysisTool,
+      imageSeo: imageSeoTool,
+      linkDensity: linkDensityTool,
+      duplicateContent: duplicateContentTool,
+      toneAnalysis: toneAnalysisTool,
+      citation: citationTool,
+      originality: originalityTool,
+      editTitle: editTitleTool,
+      editDescription: editDescriptionTool,
+      editKeywords: editKeywordsTool,
+      editSlug: editSlugTool,
+      optimizeTitle: optimizeTitleTool,
+      optimizeMeta: optimizeMetaTool,
+      injectKeywords: injectKeywordsTool,
+      addInternalLinks: addInternalLinksTool,
+      addExternalLinks: addExternalLinksTool,
+      improveReadability: improveReadabilityTool,
+      generateQuickAnswer: generateQuickAnswerTool,
+      suggestImages: suggestImagesTool,
+      dateTool: dateTool,
+   },
 });

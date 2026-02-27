@@ -1,7 +1,7 @@
 import { handleChatStream, mastra } from "@packages/agents";
 import { createFileRoute } from "@tanstack/react-router";
-import { createUIMessageStreamResponse } from "ai";
 import type { ModelMessage } from "ai";
+import { createUIMessageStreamResponse } from "ai";
 
 import { auth } from "@/integrations/orpc/server-instances";
 

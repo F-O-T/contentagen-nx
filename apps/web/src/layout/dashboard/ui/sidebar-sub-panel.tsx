@@ -53,7 +53,7 @@ function SubPanelSidebar({
    const mainSidebar = manager.use("main");
    const panelLeft =
       mainSidebar?.state === "collapsed"
-         ? "calc(var(--sidebar-width-icon) - 1px)"
+         ? "calc(var(--sidebar-width-icon) + 1rem)"
          : "calc(var(--sidebar-width) - 1px)";
 
    const handleItemClick = useCallback(() => {
