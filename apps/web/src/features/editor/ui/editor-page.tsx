@@ -12,6 +12,12 @@ import {
 } from "@/features/content/collections/content-collection";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
+import {
+   resetChatContext,
+   setChatMode,
+} from "@/features/teco-chat/stores/chat-context-store";
+import { editorContentStore } from "../stores/editor-content-store";
+import { markdownToPlateValue } from "../utils/markdown-to-plate";
 import { PlateEditor } from "../plate/plate-editor";
 import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
 import { EditorMetaPanel } from "./editor-meta-panel";
@@ -27,6 +33,14 @@ export function EditorPage({ contentId }: EditorPageProps) {
    // teamId from session — safe here since EditorPage is always inside <Suspense>
    const { activeTeamId } = useActiveTeam();
    const teamId = activeTeamId ?? "";
+
+   // Sync chat context: editor mode + contentId so the agent can write to this content.
+   useEffect(() => {
+      setChatMode("editor", contentId);
+      return () => {
+         resetChatContext();
+      };
+   }, [contentId]);
 
    // Electric collection scoped to this team — memoized so it's stable across renders.
    const collection = useMemo(
@@ -57,10 +71,16 @@ export function EditorPage({ contentId }: EditorPageProps) {
       () => httpContent.meta ?? { title: "", description: "", slug: "" },
    );
    const [isSaving, setIsSaving] = useState(false);
+   // Incremented only when Electric pushes a meta update from an agent write.
+   // Used as key on EditorMetaPanel to force form remount with new defaultValues.
+   const [metaVersion, setMetaVersion] = useState(0);
 
    const editorValueRef = useRef<Value | undefined>(undefined);
    const plateEditorRef = useRef<SlateEditor | null>(null);
    const lastAppliedBodyRef = useRef<string | null>(httpContent?.body ?? null);
+   const lastAppliedMetaRef = useRef<string>(
+      JSON.stringify(httpContent?.meta ?? {}),
+   );
 
    const updateMutation = useMutation(orpc.content.update.mutationOptions({}));
    const publishMutation = useMutation(
@@ -101,6 +121,8 @@ export function EditorPage({ contentId }: EditorPageProps) {
    const handleMetaSave = useCallback(
       async (values: ContentMeta) => {
          setMeta(values);
+         // Mark this value as "written by us" so the Electric echo doesn't re-trigger.
+         lastAppliedMetaRef.current = JSON.stringify(values);
          await updateMutation.mutateAsync({
             id: contentId,
             data: {
@@ -133,10 +155,43 @@ export function EditorPage({ contentId }: EditorPageProps) {
       }
    }, [liveContent?.body]);
 
+   // Register with editorContentStore so tool UIs can apply markdown to this editor.
+   useEffect(() => {
+      const fn = (markdown: string) => {
+         if (!plateEditorRef.current) return;
+         try {
+            const parsed = markdownToPlateValue(markdown.trim());
+            const incomingBody = JSON.stringify(parsed);
+            // biome-ignore lint/suspicious/noExplicitAny: PlateJS tf.setValue not typed on SlateEditor
+            (plateEditorRef.current as any).tf.setValue(parsed);
+            lastAppliedBodyRef.current = incomingBody;
+            editorValueRef.current = parsed;
+         } catch {
+            // malformed markdown — ignore
+         }
+      };
+      editorContentStore.register(fn);
+      return () => {
+         editorContentStore.unregisterIfOwner(fn);
+      };
+   }, []);
+
+   // Watch Electric CDC meta updates from agent writes (editTitle, editDescription, etc.)
+   useEffect(() => {
+      const liveMeta = liveContent?.meta;
+      if (!liveMeta) return;
+      const liveMetaStr = JSON.stringify(liveMeta);
+      if (liveMetaStr === lastAppliedMetaRef.current) return;
+      lastAppliedMetaRef.current = liveMetaStr;
+      setMeta(liveMeta as ContentMeta);
+      // Increment version to force EditorMetaPanel remount with new defaultValues.
+      setMetaVersion((v) => v + 1);
+   }, [liveContent?.meta]);
+
    useContextPanelInfo(
       <>
          <WriterPromptBanner contentId={contentId} writerId={httpContent.writerId} />
-         <EditorMetaPanel meta={meta} onSave={handleMetaSave} />
+         <EditorMetaPanel key={metaVersion} meta={meta} onSave={handleMetaSave} />
       </>,
    );
 
