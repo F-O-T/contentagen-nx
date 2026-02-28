@@ -1,6 +1,6 @@
 import type { ToolCallMessagePartProps } from "@assistant-ui/react";
 import { makeAssistantToolUI } from "@assistant-ui/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { editorContentStore } from "@/features/editor/stores/editor-content-store";
 import { EditorTool } from "./editor-tool";
 
@@ -13,16 +13,16 @@ export const WriteContentToolUI = makeAssistantToolUI<
 >({
   toolName: "write-content",
   render: (props: ToolCallMessagePartProps<WriteContentArgs, WriteContentResult>) => {
-    const { args, status, addResult } = props;
+    const { args, status } = props;
+    const hasApplied = useRef(false);
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: addResult identity is stable per tool call
     useEffect(() => {
-      if (status.type === "running" && args.markdown) {
+      if (status.type === "complete" && !hasApplied.current && args.markdown) {
+        hasApplied.current = true;
         editorContentStore.applyMarkdown(args.markdown);
-        addResult({ success: true });
       }
     }, [args.markdown, status.type]);
 
-    return <EditorTool {...(props as unknown as ToolCallMessagePartProps)} />;
+    return <EditorTool {...(props as ToolCallMessagePartProps<any, any>)} />;
   },
 });
