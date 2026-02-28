@@ -1,9 +1,6 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
-import { researchAgent } from "../agents/research-agent";
-import { reviewerAgent } from "../agents/reviewer-agent";
-import { seoAuditorAgent } from "../agents/seo-auditor-agent";
-import { writerAgent } from "../agents/writer-agent";
+import { tecoAgent } from "../agents/teco-agent";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -32,7 +29,7 @@ const researchStep = createStep({
       briefing: z.string().describe("Research briefing for the writer"),
    }),
    execute: async ({ inputData, requestContext }) => {
-      const result = await researchAgent.generate(
+      const result = await tecoAgent.generate(
          `Research this topic thoroughly and produce a structured briefing: ${inputData.topic}`,
          { requestContext },
       );
@@ -51,7 +48,7 @@ const writeStep = createStep({
       message: z.string(),
    }),
    execute: async ({ inputData, requestContext }) => {
-      const result = await writerAgent.generate(
+      const result = await tecoAgent.generate(
          `Using this research briefing, write a complete, publication-ready article:\n\n${inputData.briefing}`,
          { requestContext },
       );
@@ -77,11 +74,11 @@ const revisionCycleStep = createStep({
    }),
    execute: async ({ requestContext }) => {
       const [reviewResult, seoResult] = await Promise.all([
-         reviewerAgent.generate(
+         tecoAgent.generate(
             "Review the current article content for quality, tone, citations, readability, and AI patterns.",
             { requestContext },
          ),
-         seoAuditorAgent.generate(
+         tecoAgent.generate(
             "Audit the current article content for SEO. Apply all improvements directly.",
             { requestContext },
          ),
@@ -91,7 +88,7 @@ const revisionCycleStep = createStep({
       const combinedFeedback = `${reviewResult.text}\n\n---\nSEO Audit:\n${seoResult.text}`;
 
       if (!approved) {
-         await writerAgent.generate(
+         await tecoAgent.generate(
             `Revise the current article based on this feedback:\n\n${combinedFeedback}`,
             { requestContext },
          );

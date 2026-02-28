@@ -118,7 +118,7 @@ export function useSearch(
                description: item.meta?.description,
                type: "content" as const,
                icon: "FileText",
-               route: "/$slug/$teamSlug/$contentId",
+               route: "/$slug/$teamSlug/content/$contentId",
                params: { slug: orgSlug, teamSlug: teamId, contentId: item.id },
             }));
 

@@ -16,14 +16,23 @@ export type DiscussionRow = {
 
 /**
  * Creates (or reuses) an Electric collection for discussions scoped to a content item.
+ *
+ * Returns null during SSR — Electric requires an absolute URL and window access.
  */
 export function createDiscussionsCollection(contentId: string) {
+	if (typeof window === "undefined") return null;
 	return createCollection(
 		electricCollectionOptions<DiscussionRow>({
 			id: `discussions-${contentId}`,
 			shapeOptions: {
-				url: "/api/electric/discussions",
+				url: `${window.location.origin}/api/electric/discussions`,
 				params: { contentId },
+				onError: (error) => {
+					// Suppress unhandled error logs — the hook falls back to oRPC data.
+					// This handles stale shape handles (Electric restart) and
+					// content-not-found (404) scenarios gracefully.
+					console.warn("[Electric] discussions sync error:", error);
+				},
 			},
 			getKey: (item) => item.id,
 		}),

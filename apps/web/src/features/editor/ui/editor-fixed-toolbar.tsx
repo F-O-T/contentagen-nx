@@ -246,10 +246,10 @@ export function EditorFixedToolbar({
                Salvar
             </Button>
 
-            <Separator className="mx-0.5 h-4" orientation="vertical" />
+            {!isOpen && <Separator className="mx-0.5 h-4" orientation="vertical" />}
 
             {/* Context panel tab buttons */}
-            <div className="flex items-center gap-0.5">
+            {!isOpen && <div className="flex items-center gap-0.5">
                {allTabs.map((tab) => {
                   const isActive = isOpen && activeTabId === tab.id;
                   return (
@@ -274,7 +274,7 @@ export function EditorFixedToolbar({
                      </Tooltip>
                   );
                })}
-            </div>
+            </div>}
          </div>
       </TooltipProvider>
    );

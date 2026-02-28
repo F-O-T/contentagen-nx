@@ -1,3 +1,8 @@
+# Run all commands from apps/web/:
+#   podman-compose up -d
+#   podman-compose restart electric
+#   podman-compose logs electric -f
+
 services:
   minio:
     image: docker.io/minio/minio:latest
@@ -63,8 +68,12 @@ services:
     image: electricsql/electric:latest
     environment:
       DATABASE_URL: postgresql://postgres:password@contentta-db:5432/contentta
+      # Local dev only — replace with ELECTRIC_SECRET in production:
+      #   ELECTRIC_SECRET: <strong-random-secret>
+      # The same secret must be set as ELECTRIC_SECRET in the web app's .env
+      ELECTRIC_INSECURE: "true"
     ports:
-      - "3001:3000"
+      - "5133:3000"
     depends_on:
       contentta-db:
         condition: service_healthy

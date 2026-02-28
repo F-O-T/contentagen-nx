@@ -4,12 +4,6 @@ import { CheckIcon, LoaderIcon } from "lucide-react";
 import { memo } from "react";
 import { getToolDisplay } from "./tool-display-config";
 
-/**
- * Extract a short preview string from the tool args JSON.
- * For insertText: first 60 chars of args.text
- * For replaceText: first 60 chars of args.replaceWith
- * For others with text/content: first 60 chars of that field
- */
 function extractPreview(argsText: string | undefined): string | null {
   if (!argsText) return null;
   try {
@@ -34,45 +28,35 @@ function extractPreview(argsText: string | undefined): string | null {
   }
 }
 
-const EditorToolImpl: ToolCallMessagePartComponent = ({ toolName, argsText, status }) => {
+const EditorToolImpl: ToolCallMessagePartComponent = ({
+  toolName,
+  argsText,
+  status,
+}) => {
   const config = getToolDisplay(toolName);
-  const Icon = config?.icon;
   const label = config?.label ?? toolName;
   const preview = extractPreview(argsText);
-
   const isRunning = status?.type === "running";
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
-        isRunning && "border-primary/20 bg-primary/5",
-        !isRunning && "border-border bg-muted/20",
-      )}
-    >
-      {/* Status/icon */}
+    <div className="flex items-center gap-2 py-0.5 text-sm">
       {isRunning ? (
-        <LoaderIcon className="size-3.5 shrink-0 animate-spin text-primary" />
+        <LoaderIcon className="size-3 shrink-0 animate-spin text-primary" />
       ) : (
-        Icon && <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+        <CheckIcon className="size-3 shrink-0 text-muted-foreground/50" />
       )}
-
-      {/* Label */}
-      <span className={cn("shrink-0 font-medium", isRunning && "text-primary")}>
+      <span
+        className={cn("text-muted-foreground", isRunning && "text-foreground")}
+      >
         {label}
       </span>
-
-      {/* Preview */}
       {preview && (
         <>
-          <span className="text-muted-foreground">·</span>
-          <span className="min-w-0 truncate text-muted-foreground">{preview}</span>
+          <span className="text-muted-foreground/40">·</span>
+          <span className="min-w-0 flex-1 truncate text-xs italic text-muted-foreground/60">
+            {preview}
+          </span>
         </>
-      )}
-
-      {/* Done checkmark */}
-      {status?.type === "complete" && (
-        <CheckIcon className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
       )}
     </div>
   );

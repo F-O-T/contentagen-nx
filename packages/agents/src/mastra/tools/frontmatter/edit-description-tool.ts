@@ -17,10 +17,20 @@ export const editDescriptionTool = createTool({
       success: z.boolean(),
       newDescription: z.string(),
    }),
-   execute: async (inputData) => {
-      return {
+   execute: async (inputData, context) => {
+      const result = {
          success: true,
          newDescription: inputData.description,
       };
+
+      const onMetaUpdate = context?.requestContext?.get("onMetaUpdate") as
+         | ((patch: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onMetaUpdate) {
+         await onMetaUpdate({ description: inputData.description });
+      }
+
+      return result;
    },
 });

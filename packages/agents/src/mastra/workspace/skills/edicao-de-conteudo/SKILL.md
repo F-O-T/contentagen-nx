@@ -57,10 +57,8 @@ Guia completo (pt-BR) para usar as ferramentas de edição de conteúdo com foco
 **Insert Image** — use somente com URL fornecida pelo usuário.
 - ✅ Defina alt text claro e descritivo; adicione legenda se agrega valor.
 - ❌ Jamais invente URL ou escreva Markdown de imagem manualmente.
-
-**Suggest Images** — use para planejar onde inserir imagens e quais tipos ajudam o leitor.
-- ✅ 1 imagem a cada 300–500 palavras.
-- ✅ Sugira tipo (screenshot, diagrama, infográfico, foto) e consulta de busca.
+- ❌ **NUNCA** insira blocos de texto descrevendo imagens (ex: "Infográfico X" + "Alt: ...") no corpo do artigo.
+- ❌ **NUNCA** use suggestImages — imagens são responsabilidade do usuário.
 
 ### 4) SEO e otimização editorial
 **Inject Keywords** — use para inserir palavras‑chave faltantes mantendo naturalidade.
@@ -109,8 +107,9 @@ Guia completo (pt-BR) para usar as ferramentas de edição de conteúdo com foco
 
 ## Checklist final do editor
 - Conteúdo começa em **H2** (sem H1).
-- Sem meta‑comentários ou notas internas.
+- Sem meta‑comentários, notas internas ou placeholders de imagem.
 - Parágrafos curtos e leitura fluida.
 - Keywords naturais, sem stuffing.
 - Links internos/externos com propósito.
-- Imagens só com URL fornecida pelo usuário.
+- Imagens **somente** com URL fornecida pelo usuário — nunca inventar, nunca sugerir como texto.
+- Estatísticas e dados somente de fontes reais obtidas via ferramentas de pesquisa.

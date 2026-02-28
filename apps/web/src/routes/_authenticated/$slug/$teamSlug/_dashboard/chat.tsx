@@ -10,12 +10,18 @@ import { MessageSquarePlusIcon } from "lucide-react";
 import { useEffect } from "react";
 import { closeContextPanel } from "@/features/context-panel/use-context-panel";
 import { useTecoRuntime } from "@/features/teco-chat/hooks/use-teco-runtime";
+import {
+   resetChatContext,
+   setChatMode,
+} from "@/features/teco-chat/stores/chat-context-store";
 import { ThreadList } from "@/features/teco-chat/ui/thread-list";
 import { useActiveTeam } from "@/hooks/use-active-team";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/chat",
 )({
+   loader: () => { setChatMode("platform"); },
+   onLeave: () => { resetChatContext(); },
    component: ChatLayoutPage,
 });
 

@@ -1,3 +1,4 @@
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -67,7 +68,7 @@ function mapContentRow(row: ContentRow): ContentItem {
    };
 }
 
-export function ContentListSection() {
+function ContentListSectionInner() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
@@ -89,7 +90,7 @@ export function ContentListSection() {
 
    // Live query — always called unconditionally (React rules of hooks)
    const { data: rawRows, isLoading } = useLiveQuery(
-      (q) => teamId ? q.from({ content: collection }) : null,
+      (q) => (teamId && collection) ? q.from({ content: collection }) : null,
       [collection, teamId],
    );
    const rawItems: ContentRow[] = (rawRows ?? []) as unknown as ContentRow[];
@@ -135,7 +136,7 @@ export function ContentListSection() {
       orpc.content.create.mutationOptions({
          onSuccess: (data) => {
             navigate({
-               to: "/$slug/$teamSlug/$contentId",
+               to: "/$slug/$teamSlug/content/$contentId",
                params: {
                   slug: slug ?? "",
                   teamSlug: teamSlug ?? "",
@@ -177,7 +178,7 @@ export function ContentListSection() {
    const handleView = useCallback(
       (content: ContentItem) => {
          navigate({
-            to: "/$slug/$teamSlug/$contentId",
+            to: "/$slug/$teamSlug/content/$contentId",
             params: {
                slug: slug,
                teamSlug: teamSlug,
@@ -500,4 +501,18 @@ export function ContentListSection() {
          )}
       </div>
    );
+}
+
+/**
+ * SSR-safe wrapper — useLiveQuery uses useSyncExternalStore without getServerSnapshot,
+ * so it must not render on the server. Renders null until client hydration is complete.
+ * See: https://github.com/TanStack/db/issues/1016
+ */
+export function ContentListSection() {
+   const [mounted, setMounted] = useState(false);
+   useIsomorphicLayoutEffect(() => {
+      setMounted(true);
+   }, []);
+   if (!mounted) return null;
+   return <ContentListSectionInner />;
 }

@@ -104,11 +104,14 @@ export function useTecoRuntime({
             api: "/api/chat",
             body: async () => {
                const threadId = await ensureThread();
-               const { contextId, router, workflow } = chatContextStore.state;
+               const { contextId, mode, workflow, model, thinkingBudget } = chatContextStore.state;
                return {
                   teamId,
                   threadId,
-                  ...(contextId ? { contextId, router } : {}),
+                  model,
+                  mode,
+                  ...(thinkingBudget > 0 ? { thinkingBudget } : {}),
+                  ...(contextId ? { contextId } : {}),
                   ...(workflow ? { workflow } : {}),
                };
             },

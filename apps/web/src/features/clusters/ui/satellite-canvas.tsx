@@ -91,7 +91,7 @@ function SortableSatelliteCard({
          <Button
             onClick={() =>
                navigate({
-                  to: "/$slug/$teamSlug/$contentId",
+                  to: "/$slug/$teamSlug/content/$contentId",
                   params: { slug, teamSlug, contentId: item.contentId },
                })
             }

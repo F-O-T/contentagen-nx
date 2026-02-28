@@ -47,7 +47,7 @@ export function ClusterSatelliteList({ pillarId }: Props) {
                      className="text-sm font-medium truncate hover:underline text-left"
                      onClick={() =>
                         navigate({
-                           to: "/$slug/$teamSlug/$contentId",
+                           to: "/$slug/$teamSlug/content/$contentId",
                            params: {
                               slug,
                               teamSlug,

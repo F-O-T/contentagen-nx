@@ -15,10 +15,20 @@ export const editKeywordsTool = createTool({
       success: z.boolean(),
       keywords: z.array(z.string()),
    }),
-   execute: async (inputData) => {
-      return {
+   execute: async (inputData, context) => {
+      const result = {
          success: true,
          keywords: inputData.keywords,
       };
+
+      const onMetaUpdate = context?.requestContext?.get("onMetaUpdate") as
+         | ((patch: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onMetaUpdate) {
+         await onMetaUpdate({ keywords: inputData.keywords });
+      }
+
+      return result;
    },
 });

@@ -20,13 +20,16 @@ export type ContentRow = {
 /**
  * Creates (or reuses) an Electric collection for team-scoped content.
  * TanStack DB deduplicates by id — safe to call multiple times with the same teamId.
+ *
+ * Returns null during SSR — Electric requires an absolute URL and window access.
  */
 export function createContentCollection(teamId: string) {
+	if (typeof window === "undefined") return null;
 	return createCollection(
 		electricCollectionOptions<ContentRow>({
 			id: `content-${teamId}`,
 			shapeOptions: {
-				url: "/api/electric/content",
+				url: `${window.location.origin}/api/electric/content`,
 				params: { teamId },
 			},
 			getKey: (item) => item.id,

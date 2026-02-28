@@ -4,72 +4,63 @@ import { AlertCircleIcon, CheckIcon, LoaderIcon, XCircleIcon } from "lucide-reac
 import { memo } from "react";
 import { getToolDisplay } from "./tool-display-config";
 
-const AgentCallToolImpl: ToolCallMessagePartComponent = ({ toolName, status }) => {
+const AgentCallToolImpl: ToolCallMessagePartComponent = ({
+  toolName,
+  status,
+}) => {
   const config = getToolDisplay(toolName);
   const Icon = config?.icon;
   const label = config?.label ?? toolName;
 
   const statusType = status?.type ?? "complete";
   const isRunning = statusType === "running";
-  const isCancelled = status?.type === "incomplete" && status.reason === "cancelled";
+  const isCancelled =
+    status?.type === "incomplete" && status.reason === "cancelled";
 
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors",
-        isRunning && "border-primary/20 bg-primary/5",
-        !isRunning && !isCancelled && "border-border bg-muted/30",
-        isCancelled && "border-muted-foreground/20 bg-muted/20 opacity-60",
+        "flex items-center gap-2 py-0.5 text-sm",
+        isCancelled && "opacity-50",
       )}
     >
-      {/* Agent icon */}
+      {/* Status icon */}
+      {isRunning && (
+        <LoaderIcon className="size-3 shrink-0 animate-spin text-primary" />
+      )}
+      {statusType === "complete" && (
+        <CheckIcon className="size-3 shrink-0 text-muted-foreground/50" />
+      )}
+      {isCancelled && (
+        <XCircleIcon className="size-3 shrink-0 text-muted-foreground/50" />
+      )}
+      {status?.type === "incomplete" && !isCancelled && (
+        <AlertCircleIcon className="size-3 shrink-0 text-destructive" />
+      )}
+
+      {/* Agent icon badge */}
       {Icon && (
         <div
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full",
+            "flex size-4 shrink-0 items-center justify-center rounded-sm",
             isRunning && "bg-primary/10 text-primary",
             !isRunning && "bg-muted text-muted-foreground",
           )}
         >
-          <Icon className="size-4" />
+          <Icon className="size-2.5" />
         </div>
       )}
 
       {/* Label */}
-      <div className="relative min-w-0 grow">
-        <span
-          className={cn(
-            "font-medium",
-            isCancelled && "line-through text-muted-foreground",
-          )}
-        >
-          {label}
-        </span>
-        {isRunning && (
-          <span
-            aria-hidden
-            className="shimmer pointer-events-none absolute inset-0 font-medium motion-reduce:animate-none"
-          >
-            {label}
-          </span>
+      <span
+        className={cn(
+          "font-medium text-muted-foreground",
+          isRunning && "text-foreground",
+          isCancelled && "line-through",
         )}
-      </div>
-
-      {/* Status icon */}
-      <div className="shrink-0">
-        {isRunning && (
-          <LoaderIcon className="size-4 animate-spin text-primary" />
-        )}
-        {statusType === "complete" && (
-          <CheckIcon className="size-4 text-muted-foreground" />
-        )}
-        {isCancelled && (
-          <XCircleIcon className="size-4 text-muted-foreground" />
-        )}
-        {status?.type === "incomplete" && !isCancelled && (
-          <AlertCircleIcon className="size-4 text-destructive" />
-        )}
-      </div>
+      >
+        {label}
+      </span>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { protectedProcedure } from "../server";
 
 const getMemory = async () => {
-   const memory = await mastra.getAgent("platformRouterAgent").getMemory();
+   const memory = await mastra.getAgent("tecoAgent").getMemory();
    if (!memory)
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
          message: "Memory not configured",
@@ -90,5 +90,9 @@ export const getThreadMessages = protectedProcedure
          threadId: input.threadId,
          perPage: false,
       });
+      // Strip data-* parts (Mastra workflow/agent metadata) from stored messages.
+      // These parts are never meaningful to display, and DataUIDisplay in
+      // @assistant-ui/react crashes during SSR because RuntimeAdapter does not
+      // register the `dataRenderers` scope.
       return toAISdkV5Messages(messages);
    });

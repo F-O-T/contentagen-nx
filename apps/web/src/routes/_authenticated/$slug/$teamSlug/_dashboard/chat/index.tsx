@@ -9,7 +9,8 @@ import {
    useNavigate,
    useParams,
 } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
+import { chatContextStore } from "@/features/teco-chat/stores/chat-context-store";
 import { Thread } from "@/features/teco-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
@@ -37,15 +38,12 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
    });
    const navigate = useNavigate();
    const queryClient = useQueryClient();
-   const [mode, setMode] = useState<string>("auto");
 
    const threadIdRef = useRef<string | undefined>(undefined);
    const hasNavigated = useRef(false);
    const createThread = useMutation(orpc.chat.createThread.mutationOptions({}));
    const createThreadRef = useRef(createThread.mutateAsync);
    createThreadRef.current = createThread.mutateAsync;
-   const modeRef = useRef(mode);
-   modeRef.current = mode;
 
    // Transport lazily creates a thread on the first message send
    const transport = useMemo(
@@ -57,10 +55,13 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
                   const thread = await createThreadRef.current({ teamId });
                   threadIdRef.current = thread.id;
                }
+               const { mode, model, thinkingBudget } = chatContextStore.state;
                return {
                   teamId,
                   threadId: threadIdRef.current,
-                  mode: modeRef.current,
+                  mode,
+                  model,
+                  ...(thinkingBudget > 0 ? { thinkingBudget } : {}),
                };
             },
          }),
@@ -86,7 +87,6 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
    return (
       <AssistantRuntimeProvider runtime={runtime}>
          <Thread
-            onModeChange={setMode}
             quickSuggestions={QUICK_SUGGESTIONS}
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."

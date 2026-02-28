@@ -119,13 +119,13 @@
             "sharp": "^0.34.5"
          },
          "mastra": {
-            "@mastra/ai-sdk": "^1.0.5",
-            "@mastra/memory": "1.5.1",
+            "@mastra/ai-sdk": "1.1.0",
+            "@mastra/memory": "1.5.2",
             "@mastra/observability": "1.2.1",
             "@mastra/posthog": "1.0.4",
-            "@mastra/rag": "2.1.1",
-            "@mastra/core": "1.7.0",
-            "@mastra/pg": "1.6.1",
+            "@mastra/rag": "2.1.2",
+            "@mastra/core": "1.8.0",
+            "@mastra/pg": "1.7.0",
             "ai": "6.0.100"
          },
          "react": {

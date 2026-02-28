@@ -8,7 +8,9 @@ export const env = createEnv({
       PG_VECTOR_URL: z.url().optional(),
       REDIS_URL: z.url().optional().default("redis://localhost:6379"),
       // Electric Sync Engine (optional — enables live queries feature)
-      ELECTRIC_URL: z.url().optional().default("http://localhost:3001"),
+      ELECTRIC_URL: z.url().optional().default("http://localhost:5133"),
+      // Required in production (set ELECTRIC_INSECURE=true locally via docker-compose instead)
+      ELECTRIC_SECRET: z.string().optional(),
 
       // Better Auth (Required core, optional providers)
       BETTER_AUTH_SECRET: z.string().min(32),

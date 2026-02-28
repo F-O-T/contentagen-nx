@@ -99,9 +99,17 @@ async function handle({
 	// Pass through the streaming body (SSE / chunked transfer for live mode)
 	const electricUrl = `${env.ELECTRIC_URL}/v1/shape?${electricParams}`;
 
+	const fetchHeaders: HeadersInit = {};
+	if (env.ELECTRIC_SECRET) {
+		fetchHeaders.Authorization = `Bearer ${env.ELECTRIC_SECRET}`;
+	}
+
 	let electricResponse: Response;
 	try {
-		electricResponse = await fetch(electricUrl, { cache: "no-store" });
+		electricResponse = await fetch(electricUrl, {
+			cache: "no-store",
+			headers: fetchHeaders,
+		});
 	} catch {
 		return new Response("Electric Sync Engine unavailable", { status: 503 });
 	}

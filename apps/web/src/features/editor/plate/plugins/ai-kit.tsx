@@ -24,12 +24,6 @@ import type { ChatTransport, UIMessage, UIMessageChunk } from "ai";
 import { getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
 import type { ChatChunk } from "@/features/editor/schemas";
-import {
-   completeNetworkAgent,
-   NETWORK_AGENT_IDS,
-   resetAgentNetwork,
-   startNetworkAgent,
-} from "@/features/editor/stores/agent-network-store";
 import { client } from "@/integrations/orpc/client";
 
 // ---------------------------------------------------------------------------
@@ -99,8 +93,6 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
       const model = this.model;
       const language = this.language;
 
-      resetAgentNetwork();
-
       return new ReadableStream<UIMessageChunk>({
          async start(controller) {
             try {
@@ -131,16 +123,6 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
                            id: messageId,
                            delta: chunk.text,
                         } as UIMessageChunk);
-                     } else if (
-                        chunk.type === "tool_call_start" &&
-                        NETWORK_AGENT_IDS.has(chunk.toolCall.name)
-                     ) {
-                        startNetworkAgent(chunk.toolCall.name);
-                     } else if (
-                        chunk.type === "tool_call_complete" &&
-                        NETWORK_AGENT_IDS.has(chunk.toolName)
-                     ) {
-                        completeNetworkAgent(chunk.toolName);
                      }
                   }
                }

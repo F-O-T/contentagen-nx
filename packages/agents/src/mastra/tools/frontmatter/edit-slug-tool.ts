@@ -20,10 +20,20 @@ export const editSlugTool = createTool({
       success: z.boolean(),
       newSlug: z.string(),
    }),
-   execute: async (inputData) => {
-      return {
+   execute: async (inputData, context) => {
+      const result = {
          success: true,
          newSlug: inputData.slug,
       };
+
+      const onMetaUpdate = context?.requestContext?.get("onMetaUpdate") as
+         | ((patch: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onMetaUpdate) {
+         await onMetaUpdate({ slug: inputData.slug });
+      }
+
+      return result;
    },
 });

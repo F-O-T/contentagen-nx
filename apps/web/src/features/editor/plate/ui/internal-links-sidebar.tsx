@@ -79,7 +79,7 @@ function SuggestionsTable({
    const editor = useEditorRef();
    const { navigate } = useRouter();
    const params = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/$contentId",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/content/$contentId",
    });
    function handleInsertLink(suggestion: Suggestion) {
       if (!editor.selection) {
@@ -92,7 +92,7 @@ function SuggestionsTable({
    function handleNavigate(suggestion: Suggestion) {
       const { slug, teamSlug } = params;
       return navigate({
-         to: "/$slug/$teamSlug/$contentId",
+         to: "/$slug/$teamSlug/content/$contentId",
          params: {
             slug,
             teamSlug,

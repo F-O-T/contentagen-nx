@@ -4,10 +4,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { ContentListSection } from "@/features/content/ui/content-list-section";
+import {
+   resetChatContext,
+   setChatMode,
+} from "@/features/teco-chat/stores/chat-context-store";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/content/",
 )({
+   loader: () => { setChatMode("content-list"); },
+   onLeave: () => { resetChatContext(); },
    component: ContentPage,
 });
 
