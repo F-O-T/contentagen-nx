@@ -27,7 +27,12 @@ export const editTitleTool = createTool({
          | undefined;
 
       if (onMetaUpdate) {
-         await onMetaUpdate({ title: inputData.title });
+         try {
+            await onMetaUpdate({ title: inputData.title });
+         } catch (err) {
+            console.error("[edit-title] onMetaUpdate failed:", err);
+            return { success: false, newTitle: inputData.title };
+         }
       }
 
       return result;

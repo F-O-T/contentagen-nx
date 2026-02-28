@@ -102,6 +102,7 @@ function getToolsForMode(mode: string) {
       case "platform":
          return { ...researchTools, ...crudTools };
       default:
+         console.warn(`[getToolsForMode] Unrecognized mode "${mode}" — falling back to research tools only`);
          return { ...researchTools };
    }
 }

@@ -103,8 +103,9 @@ export const Route = createFileRoute("/api/chat/$")({
                        await updateContent(db, contextId, {
                           body: JSON.stringify(plateValue),
                        });
-                    } catch {
+                    } catch (err) {
                        // best-effort — don't crash the stream if DB write fails
+                       console.error("[onBodyUpdate] DB write failed:", err);
                     }
                  }
                : undefined;

@@ -49,6 +49,10 @@ async function handle({
 		if (!teamId) {
 			return new Response("teamId query param required", { status: 400 });
 		}
+		const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+		if (!uuidRegex.test(teamId)) {
+			return new Response("teamId must be a valid UUID", { status: 400 });
+		}
 
 		// Verify the teamId belongs to the user's active organization
 		const [teamRecord] = await db
@@ -75,6 +79,10 @@ async function handle({
 		const contentId = url.searchParams.get("contentId");
 		if (!contentId) {
 			return new Response("contentId query param required", { status: 400 });
+		}
+		const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+		if (!uuidRegex.test(contentId)) {
+			return new Response("contentId must be a valid UUID", { status: 400 });
 		}
 
 		// Verify the content belongs to the user's active organization

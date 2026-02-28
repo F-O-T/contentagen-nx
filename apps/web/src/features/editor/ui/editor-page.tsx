@@ -147,6 +147,14 @@ export function EditorPage({ contentId }: EditorPageProps) {
       ) {
          return;
       }
+      // Skip if user has local unsaved edits (editor diverged from last server-applied state)
+      if (
+         lastAppliedBodyRef.current !== null &&
+         editorValueRef.current !== undefined &&
+         JSON.stringify(editorValueRef.current) !== lastAppliedBodyRef.current
+      ) {
+         return;
+      }
       try {
          const parsed = JSON.parse(incomingBody) as Value;
          // biome-ignore lint/suspicious/noExplicitAny: PlateJS tf.setValue not typed on SlateEditor
