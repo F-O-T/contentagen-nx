@@ -67,16 +67,20 @@ export const TOOL_DISPLAY_CONFIG: Record<string, ToolDisplayConfig> = {
   },
 
   // ── Editor tools ─────────────────────────────────────────────────
-  insertText: { icon: PenLine, label: "Inserindo texto", category: "editor" },
+  "write-content": { icon: PenLine, label: "Escrevendo seção", category: "editor" },
   replaceText: { icon: Wand2, label: "Substituindo texto", category: "editor" },
-  deleteText: { icon: Trash2, label: "Removendo texto", category: "editor" },
-  formatText: { icon: Type, label: "Formatando texto", category: "editor" },
   insertHeading: { icon: Hash, label: "Inserindo título", category: "editor" },
   insertList: { icon: List, label: "Inserindo lista", category: "editor" },
   insertCodeBlock: { icon: Code, label: "Inserindo código", category: "editor" },
   insertTable: { icon: Table, label: "Inserindo tabela", category: "editor" },
-  addEditorComment: { icon: MessageSquare, label: "Adicionando comentário", category: "editor" },
-  proposeSuggestion: { icon: Sparkles, label: "Propondo sugestão", category: "editor" },
+  analyzeContent: { icon: ChartBar, label: "Analisando conteúdo", category: "analysis" },
+
+  // ── Platform CRUD tools ──────────────────────────────────────────
+  createContent: { icon: FileText, label: "Criando conteúdo", category: "utility" },
+  updateContent: { icon: PenLine, label: "Atualizando conteúdo", category: "utility" },
+  deleteContent: { icon: Trash2, label: "Removendo conteúdo", category: "utility" },
+  createDashboard: { icon: ChartBar, label: "Criando dashboard", category: "utility" },
+  createForm: { icon: FileText, label: "Criando formulário", category: "utility" },
 
   // ── Frontmatter tools ────────────────────────────────────────────
   editTitle: { icon: Type, label: "Definindo título", category: "frontmatter" },
@@ -123,6 +127,11 @@ export const TOOL_DISPLAY_CONFIG: Record<string, ToolDisplayConfig> = {
   graphSearch: { icon: Search, label: "Buscando conhecimento", category: "memory" },
   getInstructionMemories: { icon: BookOpen, label: "Carregando preferências", category: "memory" },
   dateTool: { icon: FileText, label: "Obtendo data atual", category: "utility" },
+
+  // ── Workspace skill tools ─────────────────────────────────────────
+  mastra_workspace_read_file: { icon: BookOpen, label: "Lendo skill", category: "utility" },
+  mastra_workspace_search: { icon: Search, label: "Pesquisando skills", category: "utility" },
+  mastra_workspace_list_files: { icon: List, label: "Listando skills", category: "utility" },
 };
 
 export function getToolDisplay(toolName: string): ToolDisplayConfig | null {
