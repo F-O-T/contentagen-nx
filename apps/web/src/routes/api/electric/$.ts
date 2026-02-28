@@ -93,7 +93,8 @@ async function handle({
 			});
 		}
 
-		electricParams.set("where", `"content_id" = '${contentId}'`);
+		electricParams.set("where", `"content_id" = $1`);
+		electricParams.set("params", JSON.stringify([contentId]));
 	}
 
 	// Proxy the request to Electric Sync Engine
