@@ -5,7 +5,10 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { SlateEditor, Value } from "platejs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import {
+   setInfoContent,
+   useContextPanelInfo,
+} from "@/features/context-panel/use-context-panel";
 import {
    createContentCollection,
    type ContentRow,
@@ -194,6 +197,20 @@ export function EditorPage({ contentId }: EditorPageProps) {
          <EditorMetaPanel key={metaVersion} meta={meta} onSave={handleMetaSave} />
       </>,
    );
+
+   // Re-sync context panel info whenever metaVersion changes (agent writes update meta).
+   // useContextPanelInfo uses an empty [] dep array so it only runs on mount — this effect
+   // explicitly propagates subsequent meta version bumps to the context panel store.
+   // biome-ignore lint/correctness/useExhaustiveDependencies: metaVersion is the only intended trigger
+   useEffect(() => {
+      if (metaVersion === 0) return; // Initial mount handled by useContextPanelInfo
+      setInfoContent(
+         <>
+            <WriterPromptBanner contentId={contentId} writerId={httpContent.writerId} />
+            <EditorMetaPanel key={metaVersion} meta={meta} onSave={handleMetaSave} />
+         </>,
+      );
+   }, [metaVersion]);
 
    return (
       <div className="flex h-full flex-col">
