@@ -10,55 +10,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { ModelMessage } from "ai";
 import { createUIMessageStreamResponse } from "ai";
 
-import { markdownToPlateValue } from "@/features/editor/utils/markdown-to-plate";
+import type { Value } from "platejs";
+
+import { markdownToPlateValue, plateValueToMarkdown } from "@/features/editor/utils/markdown-to-plate";
 import { auth, db } from "@/integrations/orpc/server-instances";
 
-// Minimal Plate JSON → markdown serializer for agent consumption.
-// Covers the node types produced by markdownToPlateValue.
-function plateNodesToMarkdown(nodes: unknown[]): string {
-   function leafText(node: unknown): string {
-      if (typeof node !== "object" || node === null) return "";
-      const n = node as Record<string, unknown>;
-      if (typeof n.text === "string") return n.text;
-      if (Array.isArray(n.children)) return n.children.map(leafText).join("");
-      return "";
-   }
-
-   const lines: string[] = [];
-   for (const node of nodes) {
-      if (typeof node !== "object" || node === null) continue;
-      const n = node as Record<string, unknown>;
-      const children = Array.isArray(n.children) ? n.children : [];
-      const text = children.map(leafText).join("");
-
-      switch (n.type) {
-         case "h1": lines.push(`# ${text}`); break;
-         case "h2": lines.push(`## ${text}`); break;
-         case "h3": lines.push(`### ${text}`); break;
-         case "h4": lines.push(`#### ${text}`); break;
-         case "h5": lines.push(`##### ${text}`); break;
-         case "h6": lines.push(`###### ${text}`); break;
-         case "blockquote": lines.push(`> ${text}`); break;
-         case "code_block": lines.push(`\`\`\`\n${text}\n\`\`\``); break;
-         case "ul":
-            for (const child of children) {
-               lines.push(`- ${leafText(child)}`);
-            }
-            break;
-         case "ol": {
-            let idx = 1;
-            for (const child of children) {
-               lines.push(`${idx}. ${leafText(child)}`);
-               idx++;
-            }
-            break;
-         }
-         default:
-            if (text) lines.push(text);
-      }
-   }
-   return lines.join("\n\n");
-}
 
 async function loadContentContext(
    dbClient: typeof db,
@@ -171,8 +127,8 @@ export const Route = createFileRoute("/api/chat/$")({
                     try {
                        const record = await getContentById(db, contextId);
                        if (!record?.body) return null;
-                       const nodes = JSON.parse(record.body) as unknown[];
-                       const markdown = plateNodesToMarkdown(nodes);
+                       const nodes = JSON.parse(record.body) as Value;
+                       const markdown = plateValueToMarkdown(nodes);
                        const wordCount = markdown.split(/\s+/).filter(Boolean).length;
                        return { markdown, wordCount };
                     } catch {
