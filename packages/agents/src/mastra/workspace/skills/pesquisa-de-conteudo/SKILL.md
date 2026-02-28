@@ -92,14 +92,11 @@ O briefing deve incluir:
 - Sugestões de snippet (formato e resposta curta).
 
 ## Ferramentas de pesquisa (quando usar)
-- **webSearch**: descoberta ampla de fontes.
-- **serpAnalysis**: análise rápida e estruturada da SERP.
-- **contentGap**: encontrar lacunas entre concorrentes.
-- **competitorContent**: mapear estrutura e padrões dos líderes.
-- **relatedKeywords**: expandir variações e cauda longa.
-- **factFinder**: encontrar estatísticas e fatos.
-- **webCrawl**: extrair dados específicos de páginas.
-- **researchCompleteness**: validar cobertura do briefing.
+- **`webSearch`**: descoberta ampla de fontes e dados.
+- **`serpAnalysis`**: análise rápida e estruturada da SERP — intenção, PAA, snippet format.
+- **`relatedKeywords`**: expandir variações semânticas e cauda longa.
+- **`webCrawl`**: extrair dados específicos de páginas confiáveis.
+- **`searchPreviousContent`**: verificar conteúdo já existente sobre o tópico antes de criar.
 
 ## Qualidade e completude
 Antes de finalizar, valide:

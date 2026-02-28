@@ -1,3 +1,8 @@
+# Run all commands from apps/web/:
+#   podman-compose up -d
+#   podman-compose restart electric
+#   podman-compose logs electric -f
+
 services:
   minio:
     image: docker.io/minio/minio:latest
@@ -19,6 +24,7 @@ services:
 
   contentta-db:
     image: docker.io/postgres:15
+    command: postgres -c wal_level=logical
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -27,6 +33,11 @@ services:
       - contentta_pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d contentta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -52,6 +63,26 @@ services:
       - pgvector_data:/var/lib/postgresql/data
     ports:
       - "8000:5432"
+
+  electric:
+    image: electricsql/electric:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:password@contentta-db:5432/contentta
+      # Local dev only — replace with ELECTRIC_SECRET in production:
+      #   ELECTRIC_SECRET: <strong-random-secret>
+      # The same secret must be set as ELECTRIC_SECRET in the web app's .env
+      ELECTRIC_INSECURE: "true"
+    ports:
+      - "5133:3000"
+    depends_on:
+      contentta-db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   contentta_pgdata:

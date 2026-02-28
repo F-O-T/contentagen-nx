@@ -103,13 +103,17 @@ description: Diretrizes completas de SEO on-page para posts de blog, com priorid
 
 ## Validação pós‑escrita (obrigatória)
 
-Após finalizar o post, executar e revisar:
+Após finalizar o post, chame:
 
-- `seoScoreTool`
-- `readabilityTool`
-- `keywordDensityTool`
+- **`analyzeContent`** — score SEO geral, identifica o que corrigir
+- **`injectKeywords`** — inserir keywords faltantes mantendo naturalidade
+- **`addInternalLinks`** — links internos (use `searchPreviousContent` primeiro para encontrar conteúdo relevante)
+- **`addExternalLinks`** — links externos para fontes citadas na pesquisa
+- **`generateQuickAnswer`** — criar resposta rápida nos primeiros 100 palavras
+- **`editTitle`** — corrigir título se necessário
+- **`editDescription`** — corrigir meta description se necessário
 
-✅ **Ação:** ajustar o texto até atingir os limites mínimos da rubrica.
+✅ **Meta mínima:** score `analyzeContent` ≥ 80 pontos antes de finalizar.
 
 ## Visão geral da pontuação de SEO
 

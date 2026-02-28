@@ -16,12 +16,25 @@ export const editTitleTool = createTool({
       success: z.boolean(),
       newTitle: z.string(),
    }),
-   execute: async (inputData) => {
-      // This tool returns instructions for the frontend to execute
-      // The actual update happens via frontmatter-tool-executor.ts
-      return {
+   execute: async (inputData, context) => {
+      const result = {
          success: true,
          newTitle: inputData.title,
       };
+
+      const onMetaUpdate = context?.requestContext?.get("onMetaUpdate") as
+         | ((patch: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onMetaUpdate) {
+         try {
+            await onMetaUpdate({ title: inputData.title });
+         } catch (err) {
+            console.error("[edit-title] onMetaUpdate failed:", err);
+            return { success: false, newTitle: inputData.title };
+         }
+      }
+
+      return result;
    },
 });

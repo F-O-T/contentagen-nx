@@ -28,13 +28,22 @@ export const replaceTextTool = createTool({
       searchText: z.string(),
       replaceWith: z.string(),
    }),
-   execute: async (inputData) => {
-      // This tool returns instructions for the frontend to execute
-      return {
+   execute: async (inputData, context) => {
+      const result = {
          success: true,
          replacements: 1, // Estimated, actual count comes from frontend
          searchText: inputData.searchText,
          replaceWith: inputData.replaceWith,
       };
+
+      const onBodyUpdate = context?.requestContext?.get("onBodyUpdate") as
+         | ((toolName: string, output: Record<string, unknown>) => Promise<void>)
+         | undefined;
+
+      if (onBodyUpdate) {
+         await onBodyUpdate("replace-text", result as Record<string, unknown>);
+      }
+
+      return result;
    },
 });

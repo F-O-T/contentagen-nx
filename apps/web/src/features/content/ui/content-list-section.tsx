@@ -1,3 +1,4 @@
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -20,16 +21,22 @@ import {
    EmptyTitle,
 } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Row } from "@tanstack/react-table";
 import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { ContextPanelAction } from "@/features/context-panel/context-panel-info";
 import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
+import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
+import {
+   createContentCollection,
+   type ContentRow,
+} from "../collections/content-collection";
 import { ContentMobileCard } from "./content-mobile-card";
 import type { ContentItem } from "./content-table-columns";
 import { createContentColumns } from "./content-table-columns";
@@ -41,7 +48,27 @@ const STATUS_FILTER_OPTIONS = [
    { label: "Arquivado", value: "archived" },
 ] as const;
 
-export function ContentListSection() {
+function mapContentRow(row: ContentRow): ContentItem {
+   const meta = row.meta as {
+      title?: string;
+      description?: string;
+      slug?: string;
+   };
+   return {
+      id: row.id,
+      status: row.status,
+      shareStatus: row.share_status ?? "private",
+      draftOrigin: row.draft_origin ?? "manual",
+      meta: {
+         title: meta.title ?? "",
+         description: meta.description,
+         slug: meta.slug ?? "",
+      },
+      createdAt: row.created_at,
+   };
+}
+
+function ContentListSectionInner() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
@@ -51,38 +78,28 @@ export function ContentListSection() {
    const [currentPage, setCurrentPage] = useState(1);
    const [pageSize, setPageSize] = useState(20);
 
-   // Prepare query input
-   const queryInput = useMemo(() => {
-      const input: {
-         limit: number;
-         page: number;
-         status?: ("draft" | "published" | "archived")[];
-      } = {
-         limit: pageSize,
-         page: currentPage,
-      };
+   // Get teamId from active team session
+   const { activeTeamId } = useActiveTeam();
+   const teamId = activeTeamId ?? "";
 
-      if (statusFilter !== "all") {
-         input.status = [statusFilter as "draft" | "published" | "archived"];
-      }
-
-      return input;
-   }, [pageSize, currentPage, statusFilter]);
-
-   // Fetch content list
-   const queryOptions = useMemo(
-      () => orpc.content.listAllContent.queryOptions({ input: queryInput }),
-      [queryInput],
+   // Electric live collection — stable reference per teamId
+   const collection = useMemo(
+      () => createContentCollection(teamId),
+      [teamId],
    );
 
-   const { data, refetch } = useSuspenseQuery(queryOptions);
+   // Live query — always called unconditionally (React rules of hooks)
+   const { data: rawRows, isLoading } = useLiveQuery(
+      (q) => (teamId && collection) ? q.from({ content: collection }) : null,
+      [collection, teamId],
+   );
+   const rawItems: ContentRow[] = (rawRows ?? []) as unknown as ContentRow[];
 
    // Delete mutation
    const deleteMutation = useMutation(
       orpc.content.remove.mutationOptions({
          onSuccess: () => {
             toast.success("Conteúdo excluído com sucesso");
-            refetch();
          },
          onError: () => {
             toast.error("Erro ao excluir conteúdo");
@@ -95,7 +112,6 @@ export function ContentListSection() {
       orpc.content.publish.mutationOptions({
          onSuccess: () => {
             toast.success("Conteúdo publicado com sucesso");
-            refetch();
          },
          onError: () => {
             toast.error("Erro ao publicar conteúdo");
@@ -108,7 +124,6 @@ export function ContentListSection() {
       orpc.content.archive.mutationOptions({
          onSuccess: () => {
             toast.success("Conteúdo arquivado com sucesso");
-            refetch();
          },
          onError: () => {
             toast.error("Erro ao arquivar conteúdo");
@@ -121,7 +136,7 @@ export function ContentListSection() {
       orpc.content.create.mutationOptions({
          onSuccess: (data) => {
             navigate({
-               to: "/$slug/$teamSlug/$contentId",
+               to: "/$slug/$teamSlug/content/$contentId",
                params: {
                   slug: slug ?? "",
                   teamSlug: teamSlug ?? "",
@@ -136,43 +151,64 @@ export function ContentListSection() {
       }),
    );
 
-   // Filter content by search query
-   const filteredContent = useMemo(() => {
-      if (!searchQuery.trim()) {
-         return data.items;
-      }
+   // Filter by status client-side
+   const statusFilteredItems = useMemo(() => {
+      if (statusFilter === "all") return rawItems;
+      return rawItems.filter((row) => row.status === statusFilter);
+   }, [rawItems, statusFilter]);
 
-      const query = searchQuery.toLowerCase();
-      return data.items.filter(
+   // Map ContentRow (snake_case) to ContentItem (camelCase)
+   const allItems = useMemo(
+      () => statusFilteredItems.map(mapContentRow),
+      [statusFilteredItems],
+   );
+
+   // Client-side search
+   const filteredContent = useMemo(() => {
+      if (!searchQuery.trim()) return allItems;
+      const q = searchQuery.toLowerCase();
+      return allItems.filter(
          (item) =>
-            item.meta.title?.toLowerCase().includes(query) ||
-            item.meta.description?.toLowerCase().includes(query),
+            item.meta.title?.toLowerCase().includes(q) ||
+            item.meta.description?.toLowerCase().includes(q),
       );
-   }, [data.items, searchQuery]);
+   }, [allItems, searchQuery]);
 
    // Action handlers
-   const handleView = (content: ContentItem) => {
-      navigate({
-         to: "/$slug/$teamSlug/$contentId",
-         params: {
-            slug: slug,
-            teamSlug: teamSlug,
-            contentId: content.id,
-         },
-      });
-   };
+   const handleView = useCallback(
+      (content: ContentItem) => {
+         navigate({
+            to: "/$slug/$teamSlug/content/$contentId",
+            params: {
+               slug: slug,
+               teamSlug: teamSlug,
+               contentId: content.id,
+            },
+         });
+      },
+      [navigate, slug, teamSlug],
+   );
 
-   const handlePublish = (content: ContentItem) => {
-      publishMutation.mutate({ id: content.id });
-   };
+   const handlePublish = useCallback(
+      (content: ContentItem) => {
+         publishMutation.mutate({ id: content.id });
+      },
+      [publishMutation],
+   );
 
-   const handleArchive = (content: ContentItem) => {
-      archiveMutation.mutate({ id: content.id });
-   };
+   const handleArchive = useCallback(
+      (content: ContentItem) => {
+         archiveMutation.mutate({ id: content.id });
+      },
+      [archiveMutation],
+   );
 
-   const handleDelete = (content: ContentItem) => {
-      deleteMutation.mutate({ id: content.id });
-   };
+   const handleDelete = useCallback(
+      (content: ContentItem) => {
+         deleteMutation.mutate({ id: content.id });
+      },
+      [deleteMutation],
+   );
 
    const handleCreateNew = () => {
       createContentMutation.mutate({
@@ -248,8 +284,19 @@ export function ContentListSection() {
       );
    }
 
-   const hasContent = data.items.length > 0;
+   // Client-side pagination
+   const pageStart = (currentPage - 1) * pageSize;
+   const paginatedContent = filteredContent.slice(pageStart, pageStart + pageSize);
+   const totalCount = filteredContent.length;
+   const totalPages = Math.ceil(totalCount / pageSize);
+
+   const hasContent = rawItems.length > 0;
+   const isLoadingContent = isLoading && rawItems.length === 0;
    const hasFilteredContent = filteredContent.length > 0;
+
+   if (isLoadingContent) {
+      return null;
+   }
 
    if (!hasContent) {
       return (
@@ -320,13 +367,12 @@ export function ContentListSection() {
       );
    }
 
-   // Calculate stats
+   // Calculate stats from full (unfiltered) collection
    const stats = {
-      total: data.total,
-      draft: data.items.filter((item) => item.status === "draft").length,
-      published: data.items.filter((item) => item.status === "published")
-         .length,
-      archived: data.items.filter((item) => item.status === "archived").length,
+      total: rawItems.length,
+      draft: rawItems.filter((r) => r.status === "draft").length,
+      published: rawItems.filter((r) => r.status === "published").length,
+      archived: rawItems.filter((r) => r.status === "archived").length,
    };
 
    return (
@@ -408,7 +454,7 @@ export function ContentListSection() {
          {hasFilteredContent ? (
             <DataTable
                columns={columns}
-               data={filteredContent}
+               data={paginatedContent}
                enableRowSelection={false}
                getRowId={(row) => row.id}
                pagination={{
@@ -416,8 +462,8 @@ export function ContentListSection() {
                   onPageChange: setCurrentPage,
                   onPageSizeChange: setPageSize,
                   pageSize,
-                  totalCount: data.total,
-                  totalPages: data.totalPages,
+                  totalCount,
+                  totalPages,
                }}
                renderMobileCard={({
                   row,
@@ -455,4 +501,18 @@ export function ContentListSection() {
          )}
       </div>
    );
+}
+
+/**
+ * SSR-safe wrapper — useLiveQuery uses useSyncExternalStore without getServerSnapshot,
+ * so it must not render on the server. Renders null until client hydration is complete.
+ * See: https://github.com/TanStack/db/issues/1016
+ */
+export function ContentListSection() {
+   const [mounted, setMounted] = useState(false);
+   useIsomorphicLayoutEffect(() => {
+      setMounted(true);
+   }, []);
+   if (!mounted) return null;
+   return <ContentListSectionInner />;
 }

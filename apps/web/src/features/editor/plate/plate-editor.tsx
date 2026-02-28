@@ -25,14 +25,14 @@ import {
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import type { Value } from "platejs";
+import type { SlateEditor, Value } from "platejs";
 import {
    Plate,
    PlateContent,
    useEditorRef,
    usePlateEditor,
 } from "platejs/react";
-import { useEffect, useMemo } from "react";
+import { type MutableRefObject, useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { orpc } from "@/integrations/orpc/client";
@@ -48,6 +48,7 @@ import { LinkKit } from "./plugins/link-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
 import { SlashKit } from "./plugins/slash-kit";
 import { TocKit } from "./plugins/toc-kit";
+
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -66,6 +67,8 @@ export interface PlateEditorProps {
    isSaving?: boolean;
    onSave?: () => void;
    onStatusChange?: (status: "draft" | "published" | "archived") => void;
+   /** Ref to expose the Plate editor instance to parent components. */
+   editorRef?: MutableRefObject<SlateEditor | null>;
 }
 
 // ---------------------------------------------------------------------------
@@ -188,6 +191,23 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
 }
 
 // ---------------------------------------------------------------------------
+// EditorRefSync — exposes the Plate editor instance to external refs.
+// Must render inside <Plate> to have access to useEditorRef().
+// ---------------------------------------------------------------------------
+
+interface EditorRefSyncProps {
+   editorRef: MutableRefObject<SlateEditor | null>;
+}
+
+function EditorRefSync({ editorRef }: EditorRefSyncProps) {
+   const editor = useEditorRef();
+   useEffect(() => {
+      editorRef.current = editor;
+   }, [editor, editorRef]);
+   return null;
+}
+
+// ---------------------------------------------------------------------------
 // PlateEditor — main exported component
 // ---------------------------------------------------------------------------
 
@@ -206,6 +226,7 @@ export function PlateEditor({
    isSaving,
    onSave,
    onStatusChange,
+   editorRef,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
    // AI command carries the correct contentId / writerId / model / language.
@@ -245,6 +266,7 @@ export function PlateEditor({
       value: initialValue,
    });
 
+
    return (
       // UploadFileProvider makes the uploadFile fn available to
       // MediaPlaceholderElement without prop drilling.
@@ -263,6 +285,7 @@ export function PlateEditor({
                 * EditorPage in <Suspense>, so no additional boundary is needed here.
                 */}
                <EditorDiscussionSync contentId={contentId} />
+               {editorRef && <EditorRefSync editorRef={editorRef} />}
 
                {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
                <EditorFixedToolbar

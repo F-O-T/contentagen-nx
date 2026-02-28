@@ -18,6 +18,8 @@ Citações aumentam a visibilidade em buscas com IA e sustentam E-E-A-T. Dados P
 2. **Toda citação precisa de atribuição** (autor, cargo/entidade, data ou contexto).
 3. **Toda afirmação factual/causal precisa de evidência** (“estudos mostram”, “pesquisas indicam”).
 4. **Preferir fontes recentes (<= 2 anos)** e **autoridade** (instituições, papers, órgãos oficiais).
+5. **URL deve ser de página específica** — não apenas domínio-raiz. `(tcu.gov.br)` ou `(gov.br)` sozinhos não são citações válidas; use a URL do relatório ou documento exato.
+6. **Exemplos numéricos de eventos reais** (ex: “X empresas participaram, economia de Y%”) só podem ser incluídos se o dado exato foi encontrado via webSearch/factFinder e citado com URL da página-fonte.
 
 ## O que deve acionar citação
 - “53% dos…”, “2 bilhões de usuários…”, “84% dos marketers…”
@@ -26,13 +28,13 @@ Citações aumentam a visibilidade em buscas com IA e sustentam E-E-A-T. Dados P
 - Comparações e rankings (“o melhor”, “o maior”, “o mais usado”)
 
 ## Formatos aceitos
-**Inline link:** [texto](url)
+**Inline parentético:** `segundo [Fonte] ([url-específica-ou-ano])`
 
-**Referência numerada:** [1]
+**Inline link:** `[texto](url-específica)`
 
-**Nota de rodapé:** [^1]
+**Atribuição direta:** `”Fonte: …”` / `”Segundo …”`
 
-**Atribuição direta:** “Fonte: …” / “Segundo …”
+> **Proibido:** `[1]`, `[^1]` e seções “Referências:” — use apenas citações inline.
 
 ## Padrão de evidência (E-E-A-T)
 - **Quem disse?** (autor ou instituição)
@@ -48,16 +50,19 @@ Citações aumentam a visibilidade em buscas com IA e sustentam E-E-A-T. Dados P
 
 ## Exemplos (❌/✅)
 ❌ “84% dos marketers usam IA.”
-✅ “84% dos marketers usam IA.” [1]
+✅ “84% dos marketers usam IA (HubSpot, hubspot.com/state-of-marketing-2024).”
 
 ❌ “Estudos mostram que o SEO melhora conversões.”
-✅ “Estudos mostram que o SEO melhora conversões.” (Segundo HubSpot, 2024) [^2]
+✅ “Estudos da HubSpot (hubspot.com/marketing-statistics) mostram que o SEO melhora conversões.”
 
 ❌ “Segundo especialistas, o tráfego orgânico é o canal mais confiável.”
-✅ “Segundo especialistas da Moz (2023), o tráfego orgânico é o canal mais confiável.” [3]
+✅ “Segundo a Moz (moz.com/learn/seo/organic-traffic-2023), o tráfego orgânico é o canal mais confiável.”
 
 ❌ “2 bilhões de usuários ativos.”
-✅ “2 bilhões de usuários ativos (Meta, 2024).” [4]
+✅ “2 bilhões de usuários ativos (Meta, about.fb.com/news/2024/...).”
+
+❌ “Em 2024, um pregão no DF atraiu 50 empresas com economia de 20% (pncp.gov.br).”
+✅ Omita — dado específico não encontrado via ferramenta com URL de página exata. Use: “conforme registros do PNCP (pncp.gov.br/busca).”
 
 ## Qualidade de fontes
 **Preferir:** papers, relatórios oficiais, institutos, universidades, órgãos públicos, líderes de mercado.
@@ -79,6 +84,9 @@ Citações aumentam a visibilidade em buscas com IA e sustentam E-E-A-T. Dados P
 - Usar “segundo especialistas” sem link ou nome.
 - Citar fonte velha quando há atualização recente.
 - Citar apenas no fim do texto e não na frase alvo.
+- **Citar apenas o domínio-raiz** (`”gov.br”`, `”tcu.gov.br”`) sem especificar a página — unverificável.
+- **Inventar exemplos ilustrativos com números específicos** (“Em 2024, um pregão atraiu 50 empresas...”) sem URL verificável da fonte exata.
+- Usar `[1]` ou `[^n]` — formato proibido neste projeto; use inline apenas.
 
 ## Resultado esperado
 Conteúdo comprovável, rastreável e com alto potencial de visibilidade em IA.

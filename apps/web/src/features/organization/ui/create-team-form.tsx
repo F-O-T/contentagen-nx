@@ -10,6 +10,7 @@ import {
 } from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
+import { createSlug } from "@packages/utils/text";
 import { useForm } from "@tanstack/react-form";
 import { AlertTriangle } from "lucide-react";
 import type { FC, FormEvent } from "react";
@@ -64,6 +65,7 @@ const CreateTeamFormContent = () => {
          const result = await authClient.organization.createTeam({
             name: data.name,
             organizationId: data.organizationId,
+            slug: createSlug(data.name),
          });
 
          if (result.error) {

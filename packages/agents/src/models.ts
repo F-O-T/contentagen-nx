@@ -22,18 +22,6 @@ export type ModelPreset = {
 // Purpose: Orchestrate full content workflows (plan→research→write→SEO→review)
 
 export const CONTENT_MODELS = {
-   "openrouter/x-ai/grok-4.1-fast": {
-      label: "Grok 4.1 Fast",
-      provider: "xAI",
-      description:
-         "Tool calling de alto desempenho — ideal para o agente executar workflows de pesquisa SERP e geração de conteúdo estruturado",
-      temperature: 0.7,
-      topP: 0.95,
-      maxTokens: 8192,
-      frequencyPenalty: 0.3,
-      presencePenalty: 0.1,
-      default: true,
-   },
    "openrouter/google/gemini-3-flash-preview": {
       label: "Gemini 3 Flash",
       provider: "Google",
@@ -45,6 +33,7 @@ export const CONTENT_MODELS = {
       frequencyPenalty: 0.2,
       presencePenalty: 0.1,
    },
+
    "openrouter/openai/gpt-oss-120b": {
       label: "GPT-OSS-120B",
       provider: "OpenAI",
@@ -77,6 +66,7 @@ export const CONTENT_MODELS = {
       maxTokens: 8192,
       frequencyPenalty: 0.2,
       presencePenalty: 0.1,
+      default: true,
    },
    "openrouter/minimax/minimax-m2.5": {
       label: "MiniMax M2.5",
@@ -100,8 +90,8 @@ export const CONTENT_MODELS = {
       frequencyPenalty: 0.3,
       presencePenalty: 0.2,
    },
-   "openrouter/bytedance-seed/seed-1.6-flash": {
-      label: "Seed 1.6 Flash",
+   "openrouter/bytedance-seed/seed-2.0-mini": {
+      label: "Seed 2.0 Mini",
       provider: "ByteDance",
       description:
          "Ultra-rápido com deep thinking e suporte multimodal — boa opção para geração rápida de rascunhos e iteração ágil em conteúdo",
@@ -201,15 +191,6 @@ export const EDIT_MODELS = {
       topP: 0.9,
       maxTokens: 2048,
    },
-   "openrouter/x-ai/grok-4.1-fast": {
-      label: "Grok 4.1 Fast",
-      provider: "xAI",
-      description:
-         "Máxima qualidade para edições complexas — melhor opção quando o comando envolve múltiplas dimensões (tom + estrutura + SEO simultaneamente)",
-      temperature: 0.5,
-      topP: 0.9,
-      maxTokens: 2048,
-   },
 } as const satisfies Record<string, ModelPreset>;
 
 // ─── Backwards-compatible unified registry ────────────────────────────────────
@@ -227,7 +208,7 @@ export type EditModelId = keyof typeof EDIT_MODELS;
 export type ModelId = keyof typeof AVAILABLE_MODELS;
 
 export const DEFAULT_CONTENT_MODEL_ID: ContentModelId =
-   "openrouter/x-ai/grok-4.1-fast";
+   "openrouter/moonshotai/kimi-k2.5";
 export const DEFAULT_AUTOCOMPLETE_MODEL_ID: AutocompleteModelId =
    "openrouter/openai/gpt-oss-20b";
 export const DEFAULT_EDIT_MODEL_ID: EditModelId =

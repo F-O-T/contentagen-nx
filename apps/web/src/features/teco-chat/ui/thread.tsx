@@ -15,45 +15,73 @@ import {
    UserMessageAttachments,
 } from "@packages/ui/components/assistant-ui/attachment";
 import { MarkdownText } from "@packages/ui/components/assistant-ui/markdown-text";
+import {
+   ModelSelector,
+   type ModelOption,
+} from "@packages/ui/components/assistant-ui/model-selector";
 import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
+import { AgentCallTool } from "./tool-components/agent-call-tool";
+import { DataNetworkRenderer } from "./tool-components/data-network-renderer";
+import { EditorTool } from "./tool-components/editor-tool";
+import {
+   ReasoningDisplay,
+   ReasoningGroupDisplay,
+} from "./tool-components/reasoning-display";
+import { ResearchTool } from "./tool-components/research-tool";
+import { SkillTool } from "./tool-components/skill-tool";
+import { WorkflowCard } from "./tool-components/workflow-card";
+import { WriteContentToolUI } from "./tool-components/write-content-tool";
 import { Button } from "@packages/ui/components/button";
 import {
    Select,
    SelectContent,
    SelectItem,
    SelectTrigger,
-   SelectValue,
 } from "@packages/ui/components/select";
 import { cn } from "@packages/ui/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-store";
 import {
    ArrowDownIcon,
    ArrowUpIcon,
+   BrainIcon,
    CheckIcon,
    ChevronLeftIcon,
    ChevronRightIcon,
    CopyIcon,
    DownloadIcon,
-   Loader2,
    MoreHorizontalIcon,
    PencilIcon,
    RefreshCwIcon,
    SparklesIcon,
    SquareIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { FC, ReactNode } from "react";
-import { useState } from "react";
+import { CONTENT_MODELS } from "@packages/agents/models";
+import type { ContentModelId } from "@packages/agents/models";
 import {
-   AGENT_DISPLAY_NAMES,
-   type AgentStatus,
-   agentNetworkStore,
-} from "@/features/editor/stores/agent-network-store";
+   chatContextStore,
+   setChatModel,
+   setChatThinkingBudget,
+} from "@/features/teco-chat/stores/chat-context-store";
+import { orpc } from "@/integrations/orpc/client";
 import { type ContextItem, ContextPicker } from "./context-picker";
 
-const MODES = [
-   { value: "auto", label: "Auto" },
-   { value: "content", label: "Conteúdo" },
+const MODEL_OPTIONS: ModelOption[] = Object.entries(CONTENT_MODELS).map(
+	([id, preset]) => ({
+		id,
+		name: preset.label,
+		description: preset.provider,
+	}),
+);
+
+const THINKING_BUDGET_OPTIONS = [
+   { value: "0", label: "Nenhum", tokens: 0 },
+   { value: "1024", label: "Baixo", tokens: 1024 },
+   { value: "4096", label: "Médio", tokens: 4096 },
+   { value: "8192", label: "Alto", tokens: 8192 },
 ] as const;
 
 export interface QuickSuggestion {
@@ -67,8 +95,6 @@ export interface ThreadProps {
    welcomeIconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
-   onModeChange?: (mode: string) => void;
-   defaultMode?: string;
 }
 
 export const Thread: FC<ThreadProps> = ({
@@ -77,16 +103,7 @@ export const Thread: FC<ThreadProps> = ({
    welcomeIconUrl,
    quickSuggestions,
    recentThreadsSlot,
-   onModeChange,
-   defaultMode = "auto",
 }) => {
-   const [mode, setMode] = useState<string>(defaultMode);
-
-   const handleModeChange = (value: string) => {
-      setMode(value);
-      onModeChange?.(value);
-   };
-
    return (
       <ThreadPrimitive.Root
          className="aui-root aui-thread-root @container flex h-full w-full flex-col bg-transparent"
@@ -94,6 +111,7 @@ export const Thread: FC<ThreadProps> = ({
             ["--thread-max-width" as string]: "44rem",
          }}
       >
+         <WriteContentToolUI />
          <ThreadPrimitive.Viewport
             className="aui-thread-viewport relative flex flex-1 flex-col overflow-y-auto scroll-smooth "
             turnAnchor="top"
@@ -119,9 +137,8 @@ export const Thread: FC<ThreadProps> = ({
             <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 ">
                <AuiIf condition={(s) => !s.thread.isEmpty}>
                   <ThreadScrollToBottom />
-                  <AgentNetworkStatus />
                </AuiIf>
-               <Composer mode={mode} onModeChange={handleModeChange} />
+               <Composer />
             </ThreadPrimitive.ViewportFooter>
          </ThreadPrimitive.Viewport>
       </ThreadPrimitive.Root>
@@ -244,13 +261,36 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
 };
 
 interface ComposerProps {
-   mode: string;
-   onModeChange: (value: string) => void;
+   // intentionally empty — mode is now read from chatContextStore
 }
 
-const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
+const Composer: FC<ComposerProps> = () => {
    const [contextItems, setContextItems] = useState<ContextItem[]>([]);
-   const aui = useAui();
+   const contentId = useStore(chatContextStore, (s) => s.contextId);
+   const selectedModel = useStore(chatContextStore, (s) => s.model);
+   const thinkingBudget = useStore(chatContextStore, (s) => s.thinkingBudget);
+   const prefillledForRef = useRef<string | null>(null);
+
+   const { data: contentData } = useQuery({
+      ...orpc.content.getById.queryOptions({ input: { id: contentId ?? "" } }),
+      enabled: !!contentId,
+   });
+
+   useEffect(() => {
+      if (contentId && contentData && prefillledForRef.current !== contentId) {
+         prefillledForRef.current = contentId;
+         setContextItems([
+            {
+               type: "current-document",
+               id: contentId,
+               label: contentData.meta?.title ?? "Documento atual",
+            },
+         ]);
+      } else if (!contentId) {
+         prefillledForRef.current = null;
+         setContextItems([]);
+      }
+   }, [contentId, contentData]);
 
    const handleContextSelect = (item: ContextItem) => {
       setContextItems((prev) =>
@@ -263,15 +303,6 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
    };
 
    const handleSubmit = () => {
-      if (contextItems.length === 0) return;
-      const contextBlock = contextItems
-         .map((item) => `@${item.label}`)
-         .join(", ");
-      const currentText = aui.composer().getState().text;
-      const separator = currentText.trim() ? "\n\n" : "";
-      aui.composer().setText(
-         `[Contexto: ${contextBlock}]${separator}${currentText}`,
-      );
       setContextItems([]);
    };
 
@@ -280,7 +311,53 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
          className="aui-composer-root relative flex w-full flex-col"
          onSubmit={handleSubmit}
       >
-         <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-xl border border-border/60 bg-background/80 px-1 pt-2 shadow-sm outline-none backdrop-blur-sm transition-all has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:shadow-md has-[textarea:focus-visible]:ring-1 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
+         <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-xl border border-border/60 bg-background/80 shadow-sm outline-none backdrop-blur-sm transition-all has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:shadow-md has-[textarea:focus-visible]:ring-1 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
+            {/* ── Settings bar: model + thinking budget ── */}
+            <div className="flex items-center gap-1 border-b border-border/40 px-1.5 py-1">
+               <ModelSelector
+                  models={MODEL_OPTIONS}
+                  onValueChange={(v) => setChatModel(v as ContentModelId)}
+                  triggerClassName="h-6 min-w-0 flex-1 border-none bg-transparent px-1.5 text-xs text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
+                  value={selectedModel}
+               />
+
+               <Select
+                  onValueChange={(v) => setChatThinkingBudget(Number(v))}
+                  value={String(thinkingBudget)}
+               >
+                  <SelectTrigger className="h-6 w-auto shrink-0 gap-1 border-none bg-transparent px-1.5 text-xs text-muted-foreground shadow-none hover:bg-accent hover:text-foreground">
+                     <BrainIcon
+                        className={cn(
+                           "size-3",
+                           thinkingBudget > 0 && "text-primary",
+                        )}
+                     />
+                     <span>
+                        {THINKING_BUDGET_OPTIONS.find(
+                           (o) => o.tokens === thinkingBudget,
+                        )?.label ?? "Nenhum"}
+                     </span>
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                     {THINKING_BUDGET_OPTIONS.map((opt) => (
+                        <SelectItem
+                           className="text-xs"
+                           key={opt.value}
+                           value={opt.value}
+                        >
+                           {opt.label}
+                           {opt.tokens > 0 && (
+                              <span className="ml-1.5 text-muted-foreground/60">
+                                 {opt.tokens.toLocaleString()} tokens
+                              </span>
+                           )}
+                        </SelectItem>
+                     ))}
+                  </SelectContent>
+               </Select>
+            </div>
+
+            {/* ── Attachments + context chips ── */}
             <ComposerAttachments />
             {contextItems.length > 0 && (
                <div className="flex flex-wrap gap-1 px-3 pt-2">
@@ -302,32 +379,26 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
                   ))}
                </div>
             )}
+
+            {/* ── Textarea ── */}
             <ComposerPrimitive.Input
                aria-label="Campo de mensagem"
                autoFocus
-               className="aui-composer-input mb-1 max-h-32 min-h-12 w-full resize-none bg-transparent px-3 pt-2 pb-2 text-sm outline-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
+               className="aui-composer-input max-h-32 min-h-12 w-full resize-none bg-transparent px-3 pt-2 pb-1 text-sm outline-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
                placeholder="Envie uma mensagem..."
                rows={1}
             />
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-2 px-1 pb-2">
-                  <Select onValueChange={onModeChange} value={mode}>
-                     <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs text-muted-foreground shadow-none hover:bg-accent">
-                        <SelectValue />
-                     </SelectTrigger>
-                     <SelectContent align="start">
-                        {MODES.map((m) => (
-                           <SelectItem
-                              className="text-xs"
-                              key={m.value}
-                              value={m.value}
-                           >
-                              {m.label}
-                           </SelectItem>
-                        ))}
-                     </SelectContent>
-                  </Select>
-                  <ContextPicker onSelect={handleContextSelect} />
+
+            {/* ── Action bar: context | attachment + send ── */}
+            <div className="flex items-center justify-between px-1 pb-1.5">
+               <div className="flex items-center gap-0.5">
+                  <ContextPicker
+                     currentDocumentId={contentId ?? undefined}
+                     currentDocumentLabel={
+                        contentData?.meta?.title ?? "Documento atual"
+                     }
+                     onSelect={handleContextSelect}
+                  />
                </div>
                <ComposerAction />
             </div>
@@ -392,7 +463,91 @@ const AssistantMessage: FC = () => {
             <MessagePrimitive.Parts
                components={{
                   Text: MarkdownText,
-                  tools: { Fallback: ToolFallback },
+                  Reasoning: ReasoningDisplay,
+                  ReasoningGroup: ReasoningGroupDisplay,
+                  ToolGroup: WorkflowCard,
+                  data: {
+                     by_name: {
+                        "data-network": DataNetworkRenderer,
+                        "data-tool-network": DataNetworkRenderer,
+                     },
+                     Fallback: ({ name }) => {
+                        console.log("[data-renderer] unmapped:", name);
+                        return null;
+                     },
+                  },
+                  tools: {
+                     Fallback: ToolFallback,
+                     by_name: {
+                        // Agent sub-calls
+                        "agent-research-agent": AgentCallTool,
+                        "agent-writer-agent": AgentCallTool,
+                        "agent-seo-auditor-agent": AgentCallTool,
+                        "agent-reviewer-agent": AgentCallTool,
+                        "agent-content-agent": AgentCallTool,
+                        // Editor tools
+                        "write-content": EditorTool,
+                        analyzeContent: ResearchTool,
+                        replaceText: EditorTool,
+                        insertHeading: EditorTool,
+                        insertList: EditorTool,
+                        insertCodeBlock: EditorTool,
+                        insertTable: EditorTool,
+                        // Frontmatter tools
+                        editTitle: EditorTool,
+                        editDescription: EditorTool,
+                        editKeywords: EditorTool,
+                        editSlug: EditorTool,
+                        // Research tools
+                        webSearch: ResearchTool,
+                        serpAnalysis: ResearchTool,
+                        competitorContent: ResearchTool,
+                        contentGap: ResearchTool,
+                        relatedKeywords: ResearchTool,
+                        factFinder: ResearchTool,
+                        webCrawl: ResearchTool,
+                        researchCompleteness: ResearchTool,
+                        searchPreviousContent: ResearchTool,
+                        graphSearch: ResearchTool,
+                        // Analysis tools (SEO auditor + reviewer)
+                        seoScore: ResearchTool,
+                        readability: ResearchTool,
+                        keywordDensity: ResearchTool,
+                        contentStructure: ResearchTool,
+                        badPatterns: ResearchTool,
+                        titleMeta: ResearchTool,
+                        quickAnswerAnalysis: ResearchTool,
+                        imageSeo: ResearchTool,
+                        linkDensity: ResearchTool,
+                        duplicateContent: ResearchTool,
+                        toneAnalysis: ResearchTool,
+                        citation: ResearchTool,
+                        originality: ResearchTool,
+                        // SEO editor tools
+                        optimizeTitle: EditorTool,
+                        optimizeMeta: EditorTool,
+                        injectKeywords: EditorTool,
+                        addInternalLinks: EditorTool,
+                        addExternalLinks: EditorTool,
+                        improveReadability: EditorTool,
+                        generateQuickAnswer: EditorTool,
+                        // Platform CRUD tools
+                        createContent: EditorTool,
+                        updateContent: EditorTool,
+                        deleteContent: EditorTool,
+                        createDashboard: EditorTool,
+                        createForm: EditorTool,
+                        // Memory & utility
+                        getInstructionMemories: ResearchTool,
+                        dateTool: ResearchTool,
+                        // Workspace skill tools
+                        mastra_workspace_read_file: SkillTool,
+                        mastra_workspace_search: SkillTool,
+                        mastra_workspace_list_files: SkillTool,
+                        // Internal agent implementation details — hidden from UI
+                        "skill-activate": () => null,
+                     },
+                  },
                }}
             />
             <MessageError />
@@ -472,7 +627,7 @@ const UserMessage: FC = () => {
             </div>
          </div>
 
-         <BranchPicker className="aui-user-branch-picker col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
+         <BranchPicker className="aui-user-branch-picker col-span-full col-start-1 row-start-3 -mr-1 justify-self-end" />
       </MessagePrimitive.Root>
    );
 };
@@ -548,63 +703,3 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       </BranchPickerPrimitive.Root>
    );
 };
-
-const AgentNetworkStatus: FC = () => {
-   const { isActive, agents } = useStore(agentNetworkStore);
-
-   if (!isActive || agents.length === 0) return null;
-
-   const activeAgent = agents.find((a) => a.status === "running");
-   const routerDone = agents.length > 0;
-
-   return (
-      <div className="w-full rounded-lg border border-border bg-muted/50 px-3 py-2.5">
-         <div className="mb-2 flex items-center gap-2">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            <span className="text-xs font-medium text-muted-foreground">
-               Agent Network
-            </span>
-            {activeAgent && (
-               <>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className="text-xs text-foreground">
-                     {AGENT_DISPLAY_NAMES[activeAgent.id] ?? activeAgent.id}
-                  </span>
-               </>
-            )}
-         </div>
-
-         <div className="mb-1.5 flex items-center gap-2 text-xs">
-            {routerDone ? (
-               <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
-            ) : (
-               <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-            )}
-            <span className="text-muted-foreground">Content Router</span>
-         </div>
-
-         <div className="ml-3 flex flex-col gap-1 border-l border-border/40 pl-2.5">
-            {agents.map((agent) => (
-               <AgentRow id={agent.id} key={agent.id} status={agent.status} />
-            ))}
-         </div>
-      </div>
-   );
-};
-
-const AgentRow: FC<{ id: string; status: AgentStatus }> = ({ id, status }) => (
-   <div className="flex items-center gap-2 text-xs">
-      {status === "running" ? (
-         <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-      ) : (
-         <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
-      )}
-      <span
-         className={
-            status === "running" ? "text-foreground" : "text-muted-foreground"
-         }
-      >
-         {AGENT_DISPLAY_NAMES[id] ?? id}
-      </span>
-   </div>
-);

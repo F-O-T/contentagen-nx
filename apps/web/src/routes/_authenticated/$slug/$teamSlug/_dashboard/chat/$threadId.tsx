@@ -9,7 +9,8 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import type { UIMessage } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { chatContextStore } from "@/features/teco-chat/stores/chat-context-store";
 import { Thread } from "@/features/teco-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
@@ -34,9 +35,6 @@ const QUICK_SUGGESTIONS = [
 function ChatThreadPage() {
    const { threadId } = Route.useParams();
    const { activeTeamId } = useActiveTeam();
-   const [mode, setMode] = useState<string>("auto");
-   const modeRef = useRef(mode);
-   modeRef.current = mode;
 
    // Sync the outer runtime's active thread state with the current URL param.
    // This makes the sidebar thread list highlight the active thread correctly,
@@ -54,11 +52,14 @@ function ChatThreadPage() {
       () =>
          new AssistantChatTransport({
             api: "/api/chat",
-            body: () => ({
-               teamId: activeTeamId,
-               threadId,
-               mode: modeRef.current,
-            }),
+            body: () => {
+               const { mode } = chatContextStore.state;
+               return {
+                  teamId: activeTeamId,
+                  threadId,
+                  mode,
+               };
+            },
          }),
       [activeTeamId, threadId],
    );
@@ -71,7 +72,6 @@ function ChatThreadPage() {
    return (
       <AssistantRuntimeProvider runtime={runtime}>
          <Thread
-            onModeChange={setMode}
             quickSuggestions={QUICK_SUGGESTIONS}
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
