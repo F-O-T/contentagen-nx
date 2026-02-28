@@ -25,8 +25,9 @@ export const writeContentTool = createTool({
     if (onBodyUpdate) {
       try {
         await onBodyUpdate("write-content", { markdown });
-      } catch {
+      } catch (err) {
         // best-effort — don't fail the tool if the update callback throws
+        console.error("[write-content] onBodyUpdate failed:", err);
       }
     }
 

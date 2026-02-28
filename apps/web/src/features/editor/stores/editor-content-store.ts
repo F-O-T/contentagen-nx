@@ -20,12 +20,26 @@ class EditorContentStore {
 
    /** Register the editor's apply-markdown callback. Called on editor mount. */
    register(fn: (markdown: string) => void): void {
+      if (process.env.NODE_ENV === "development" && this.callback !== null) {
+         console.warn("[EditorContentStore] Overwriting an existing registration. Did you forget to call unregister()?");
+      }
       this.callback = fn;
    }
 
    /** Unregister the callback. Called on editor unmount. */
    unregister(): void {
       this.callback = null;
+   }
+
+   /**
+    * Unregister the callback only if the provided fn is the currently registered
+    * one. Prevents React StrictMode double-invoke or fast navigation races from
+    * silently clearing a newer registration.
+    */
+   unregisterIfOwner(fn: (markdown: string) => void): void {
+      if (this.callback === fn) {
+         this.callback = null;
+      }
    }
 
    /**
