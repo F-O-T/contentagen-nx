@@ -69,7 +69,8 @@ async function handle({
 		}
 
 		// Server-injected where clause — client cannot override this
-		electricParams.set("where", `"team_id" = '${teamId}'`);
+		electricParams.set("where", `"team_id" = $1`);
+		electricParams.set("params", JSON.stringify([teamId]));
 	} else if (table === "discussions") {
 		const contentId = url.searchParams.get("contentId");
 		if (!contentId) {
